@@ -7,9 +7,29 @@ resources.rc
 by: Matthew Justice
 
 ---------------------------------------------------------------*/
-#include "WinResrc.h"
+#include "esnpad.h"
 
 100            ICON                    "esnpad.ico"
+
+IDR_MENUMAIN MENU DISCARDABLE 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&New\tCtrl+N",                IDM_FILE_NEW
+        MENUITEM "&Open...\tCtrl+O",            IDM_FILE_OPEN
+        MENUITEM "&Save\tCtrl+S",               IDM_FILE_SAVE
+        MENUITEM "&Save As...",                 IDM_FILE_SAVE_AS
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit",                       IDM_FILE_EXIT
+    END
+END
+
+IDR_ACCELMAIN ACCELERATORS DISCARDABLE 
+BEGIN
+    "N",            IDM_FILE_NEW,           VIRTKEY, CONTROL, NOINVERT
+    "O",            IDM_FILE_OPEN,          VIRTKEY, CONTROL, NOINVERT
+    "S",            IDM_FILE_SAVE,          VIRTKEY, CONTROL, NOINVERT
+END
 
 VS_VERSION_INFO VERSIONINFO
  FILEVERSION 0,1,0,0

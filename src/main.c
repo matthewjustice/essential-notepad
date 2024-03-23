@@ -9,14 +9,7 @@ by: Matthew Justice
 
 #include <windows.h>
 #include <commctrl.h>
-
-//
-// function prototypes
-//
-LRESULT CALLBACK MainWndProc(HWND, UINT, WPARAM, LPARAM);
-BOOL InitApp();
-BOOL InitWindow(int);
-int MsgLoop(void);
+#include "esnpad.h"
 
 //
 // globals
@@ -27,12 +20,6 @@ HWND g_hwndEdit = NULL;    // handle to edit control
 HWND g_hwndStatus = NULL;  // handle to status control
 TCHAR g_nameMainClass[] = TEXT("MainWinClass"); // name of the main window class
 TCHAR g_appTitle[]  = TEXT("Essential Notepad"); // title of the application
-
-//
-// Constants
-//
-#define IDC_EDIT   0x100
-#define IDC_STATUS 0x101
 
 //
 // WinMain
@@ -99,6 +86,7 @@ BOOL InitApp()
     wc.hbrBackground = (HBRUSH) GetStockObject(WHITE_BRUSH);
     wc.hCursor = LoadCursor(NULL, IDC_ARROW);
     wc.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+    wc.lpszMenuName = MAKEINTRESOURCE(IDR_MENUMAIN);
 
     // register the class so it can be used to create windows
     return RegisterClassEx(&wc);
@@ -186,6 +174,22 @@ LRESULT MainWndOnResize(int width, int height)
 }
 
 //
+// MainWndOnCommand
+// Handles WM_COMMAND for the main window
+//
+LRESULT MainWndOnCommand(HWND hwnd, int id)
+{
+    switch(id)
+    {
+    case IDM_FILE_EXIT:
+        SendMessage(hwnd, WM_CLOSE, 0, 0);
+        break;
+    }
+
+    return 0;
+}
+
+//
 // MainWndProc
 // main windows procdure
 //
@@ -204,6 +208,9 @@ LRESULT CALLBACK MainWndProc(
         break;
     case WM_SIZE:
         result = MainWndOnResize((int)LOWORD(lparam), (int)HIWORD(lparam));
+        break;
+    case WM_COMMAND:
+        result = MainWndOnCommand(hwnd, (int)LOWORD(wparam));
         break;
     case WM_CLOSE:
         DestroyWindow(hwnd); // if the main window is closed, destroy it
