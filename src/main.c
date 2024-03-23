@@ -8,6 +8,7 @@ by: Matthew Justice
 ---------------------------------------------------------------*/
 
 #include <windows.h>
+#include <commctrl.h>
 
 //
 // function prototypes
@@ -22,8 +23,16 @@ int MsgLoop(void);
 //
 HINSTANCE g_hinst;  // main instance handle
 HWND g_hwndMain;    // handle to main window
+HWND g_hwndEdit = NULL;    // handle to edit control
+HWND g_hwndStatus = NULL;  // handle to status control
 TCHAR g_nameMainClass[] = TEXT("MainWinClass"); // name of the main window class
 TCHAR g_appTitle[]  = TEXT("Essential Notepad"); // title of the application
+
+//
+// Constants
+//
+#define IDC_EDIT   0x100
+#define IDC_STATUS 0x101
 
 //
 // WinMain
@@ -66,8 +75,18 @@ int WINAPI WinMain(
 //
 BOOL InitApp()
 {
-    // a window class structure describes the window
     WNDCLASSEX wc;
+    INITCOMMONCONTROLSEX icc;
+
+    // Ensure that comctl32.dll is loaded, register status bar control class
+    icc.dwSize = sizeof(icc);
+    icc.dwICC = ICC_BAR_CLASSES;
+    if(!InitCommonControlsEx(&icc))
+    {
+        return FALSE;
+    }
+
+    // Describe the main window with the window class structure
     ZeroMemory(&wc, sizeof(wc));
 
     // required parameters
@@ -109,6 +128,64 @@ BOOL InitWindow(int nCmdShow)
 }
 
 //
+// MainWndOnCreate
+// Handles WM_CREATE for the main window
+//
+LRESULT MainWndOnCreate(HWND hwnd) {
+
+    // Create the edit control window
+    g_hwndEdit = CreateWindowEx(0, TEXT("Edit"), NULL,
+        WS_VISIBLE|WS_CHILD|WS_BORDER|WS_VSCROLL|ES_MULTILINE|ES_AUTOHSCROLL|ES_AUTOVSCROLL,
+        0, 0, 100, 100, hwnd, (HMENU)IDC_EDIT, g_hinst, NULL);
+
+    if(!g_hwndEdit)
+    {
+        // -1 indicates WM_CREATE failure
+        return -1;
+    }
+
+    // Create the status bar control
+    g_hwndStatus = CreateWindowEx(0, STATUSCLASSNAME, NULL,
+        WS_VISIBLE|WS_CHILD|SBARS_SIZEGRIP,
+        0, 0, 0, 0, hwnd, (HMENU)IDC_STATUS, g_hinst, NULL);
+
+    if(!g_hwndStatus)
+    {
+        // -1 indicates WM_CREATE failure
+        return -1;
+    }
+
+    return 0;
+}
+
+//
+// MainWndOnResize
+// Handles WM_SIZE for the main window
+//
+LRESULT MainWndOnResize(int width, int height)
+{
+    if(g_hwndEdit && g_hwndStatus)
+    {
+        RECT rectStatus;
+        int heightEdit;
+
+        // Set the status bar size
+        SendMessage(g_hwndStatus, WM_SIZE, SIZE_RESTORED, 0);
+
+        // Get the status bar window rectangle
+        GetWindowRect(g_hwndStatus, &rectStatus);
+
+        // Calculate the height of the edit control
+        heightEdit = height - (rectStatus.bottom - rectStatus.top);
+
+        // Resize the edit control
+        MoveWindow(g_hwndEdit, 0, 0, width, heightEdit, TRUE);
+    }
+
+    return 0;
+}
+
+//
 // MainWndProc
 // main windows procdure
 //
@@ -118,8 +195,16 @@ LRESULT CALLBACK MainWndProc(
     WPARAM wparam,
     LPARAM lparam)
 {
+    LRESULT result = 0;
+
     switch (msg)
     {
+    case WM_CREATE:
+        result = MainWndOnCreate(hwnd);
+        break;
+    case WM_SIZE:
+        result = MainWndOnResize((int)LOWORD(lparam), (int)HIWORD(lparam));
+        break;
     case WM_CLOSE:
         DestroyWindow(hwnd); // if the main window is closed, destroy it
         break;
@@ -130,7 +215,7 @@ LRESULT CALLBACK MainWndProc(
         return DefWindowProc(hwnd, msg, wparam, lparam);
     }
 
-    return 0;
+    return result;
 }
 
 //
