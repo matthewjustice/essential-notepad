@@ -25,6 +25,7 @@ void SetEditTextFromFile(LPTSTR filePath)
     HANDLE hFile;
     BYTE buffer[CB_BUFFER];
     DWORD bytesRead;
+    WCHAR text[CCH_TEXT];
 
     // Select all current text in the edit control
     SendMessage(g_hwndEdit, EM_SETSEL, 0, -1);
@@ -48,12 +49,16 @@ void SetEditTextFromFile(LPTSTR filePath)
             return;
         }
 
-        // Treat input as ANSI
         // Add a null terminator after the last byte read
         buffer[bytesRead] = 0;
 
-        // Replace the selected text in the edit control, or append if none selected 
-        SendMessageA(g_hwndEdit, EM_REPLACESEL, FALSE, (LPARAM)buffer);
+        // Convert from UTF-8 to WCHAR. This also handles ANSI, and UTF-8 with BOM too.
+        if(MultiByteToWideChar(CP_UTF8, MB_PRECOMPOSED, buffer, -1, text, CCH_TEXT) != 0)
+        {
+            // Replace the selected text in the edit control, or append if none selected 
+            SendMessageW(g_hwndEdit, EM_REPLACESEL, FALSE, (LPARAM)text);
+        }
+
     } while (bytesRead);
 
     return;
