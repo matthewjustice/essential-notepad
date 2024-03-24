@@ -181,6 +181,9 @@ LRESULT MainWndOnCommand(HWND hwnd, int id)
 {
     switch(id)
     {
+    case IDM_FILE_OPEN:
+        MainWndOnOpenFile();
+        break;
     case IDM_FILE_EXIT:
         SendMessage(hwnd, WM_CLOSE, 0, 0);
         break;

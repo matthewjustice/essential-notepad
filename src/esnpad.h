@@ -15,6 +15,7 @@ by: Matthew Justice
 // General Constants
 #define IDC_EDIT           100
 #define IDC_STATUS         101
+#define CB_BUFFER          512
 
 // Resource constants
 #define IDR_MENUMAIN       200
@@ -30,5 +31,8 @@ LRESULT CALLBACK MainWndProc(HWND, UINT, WPARAM, LPARAM);
 BOOL InitApp();
 BOOL InitWindow(int);
 int MsgLoop(void);
+
+// Function prototypes - file.c
+void MainWndOnOpenFile(void);
 
 #endif // _ESNPAD_H_
