@@ -16,7 +16,6 @@ by: Matthew Justice
 #define IDC_EDIT           100
 #define IDC_STATUS         101
 #define CB_BUFFER          512
-#define CCH_TEXT           512
 
 // Resource constants
 #define IDR_MENUMAIN       200
