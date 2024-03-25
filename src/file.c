@@ -16,6 +16,69 @@ extern HWND g_hwndMain;
 extern HWND g_hwndEdit;
 
 //
+// ReadAllFileBytes
+// Read all the bytes of a file specified by hFile.
+// The bytes are read into buffer dst of size dstSize.
+//
+BOOL ReadAllFileBytes(HANDLE hFile, BYTE * dst, size_t dstSize)
+{
+    BYTE readBuffer[CB_BUFFER];
+    DWORD bytesRead;
+    DWORD byteOffset = 0;
+
+    // Read the bytes of the file chunks matching our buffer size, and
+    // append that text to the dst buffer as we go.
+    do
+    {
+        if(!ReadFile(hFile, readBuffer, CB_BUFFER, &bytesRead, NULL))
+        {
+            return FALSE;
+        }
+
+        // Copy the bytes into the text buffer.
+        if(memcpy_s(dst+byteOffset, dstSize, readBuffer, bytesRead) != 0)
+        {
+            return FALSE;
+        }
+
+        // Update our offset into the dst buffer
+        byteOffset += bytesRead;
+    } while (bytesRead);
+
+    return TRUE;
+}
+
+//
+// Set the text in g_hwndEdit to the characters specified in data.
+//
+void SetEditText(BYTE * data, size_t dataSize)
+{
+    WCHAR * wideText;
+    size_t wideTextSize;
+
+    // Allocate a buffer for holding our text as wide characters.
+    // It needs to be 2 times the size of the file, since worst-case
+    // each UTF-8 byte expands to a wide char.
+    wideTextSize = dataSize * 2;
+    wideText = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, wideTextSize);
+    if(wideText)
+    {
+        // Convert from UTF-8 to WCHAR. This also handles ANSI, and UTF-8 with BOM too.
+        if(MultiByteToWideChar(CP_UTF8, MB_PRECOMPOSED, data, -1, wideText, wideTextSize / sizeof(WCHAR)) != 0)
+        {
+            // Select all current text in the edit control
+            SendMessage(g_hwndEdit, EM_SETSEL, 0, -1);
+
+            // Replace the selected text in the edit control, or append if none selected 
+            SendMessageW(g_hwndEdit, EM_REPLACESEL, FALSE, (LPARAM)wideText);
+        }
+        HeapFree(GetProcessHeap(), 0, wideText);
+    }
+
+    return;
+}
+
+//
 // SetEditTextFromFile
 // Read the text from the specified file path and
 // populate the edit control with that text.
@@ -23,12 +86,9 @@ extern HWND g_hwndEdit;
 void SetEditTextFromFile(LPTSTR filePath)
 {
     HANDLE hFile;
-    BYTE buffer[CB_BUFFER];
-    DWORD bytesRead;
-    WCHAR text[CCH_TEXT];
-
-    // Select all current text in the edit control
-    SendMessage(g_hwndEdit, EM_SETSEL, 0, -1);
+    BYTE * fileBytes;
+    size_t fileBytesSize;
+    LARGE_INTEGER fileSize;
 
     // Open the file
     hFile = CreateFile(filePath, GENERIC_READ, FILE_SHARE_READ,
@@ -39,28 +99,27 @@ void SetEditTextFromFile(LPTSTR filePath)
         return;
     }
 
-    // Read the bytes of the file chunks matching our buffer size, and
-    // add that text to the edit control as we go.
-    do
+    // Get the file size
+    if(GetFileSizeEx(hFile, &fileSize))
     {
-        if(!ReadFile(hFile, buffer, CB_BUFFER-1, &bytesRead, NULL))
+        // Allocate a buffer that is large enough to hold the entire contents
+        // of the file, plus a byte for a null terminator (which will already
+        // be present due to allocating HEAP_ZERO_MEMORY).
+        fileBytesSize = (size_t)fileSize.QuadPart + 1;
+        fileBytes = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, fileBytesSize);
+        if(fileBytes)
         {
-            CloseHandle(hFile);
-            return;
+            // Read all the bytes of the file into fileBytes
+            if(ReadAllFileBytes(hFile, fileBytes, fileBytesSize))
+            {
+                SetEditText(fileBytes, fileBytesSize);
+            }
+
+            HeapFree(GetProcessHeap(), 0, fileBytes);
         }
+    }
 
-        // Add a null terminator after the last byte read
-        buffer[bytesRead] = 0;
-
-        // Convert from UTF-8 to WCHAR. This also handles ANSI, and UTF-8 with BOM too.
-        if(MultiByteToWideChar(CP_UTF8, MB_PRECOMPOSED, buffer, -1, text, CCH_TEXT) != 0)
-        {
-            // Replace the selected text in the edit control, or append if none selected 
-            SendMessageW(g_hwndEdit, EM_REPLACESEL, FALSE, (LPARAM)text);
-        }
-
-    } while (bytesRead);
-
+    CloseHandle(hFile);
     return;
 }
 
