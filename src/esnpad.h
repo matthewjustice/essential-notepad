@@ -35,4 +35,7 @@ int MsgLoop(void);
 // Function prototypes - file.c
 void MainWndOnOpenFile(void);
 
+// Function prototypes - utility.c
+void DebugLog(const char * format, ...);
+
 #endif // _ESNPAD_H_
