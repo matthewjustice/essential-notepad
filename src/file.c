@@ -49,6 +49,55 @@ BOOL ReadAllFileBytes(HANDLE hFile, BYTE * dst, size_t dstSize)
 }
 
 //
+// ConvertBytesToString
+// Given a data buffer of bytes that contains string data
+// that may be ANSI, UTF-8, or UTF-16, convert the data
+// to a wide character string.
+//
+BOOL ConvertBytesToString(BYTE * data, size_t dataSize, WCHAR * wideText, size_t wideTextSize)
+{
+    BOOL success = FALSE;
+
+    // Detect the encoding
+    if(dataSize >= 2 && data[0] == 0xFF && data[1] == 0xFE)
+    {
+        DebugLog("UTF-16 LE detected");
+        // The BOM says this is UTF-16 LE (or UTF-32, but ignore that)
+        // So just treat the data as wide text and copy it into the output buffer.
+        // Start copying from +2 to skip over the BOM bytes.
+        if(SUCCEEDED(StringCchCopyW(wideText, wideTextSize / sizeof(WCHAR), (LPWSTR)(data+2))))
+        {
+            success = TRUE;
+        }
+    }
+    else if(dataSize >= 2 && data[0] == 0xFE && data[1] == 0xFF)
+    {
+        DebugLog("UTF-16 BE is not supported");
+        success = FALSE;
+    }
+    else
+    {
+        DebugLog("Treating data as UTF-8 or ANSI");
+
+        // Check for UTF-8 BOM
+        if(dataSize >= 3 && data[0] == 0xEF && data[1] == 0xBB && data[2] == 0xBF)
+        {
+            DebugLog("\nUTF-8 with BOM detected");
+            // Move the data pointer past the BOM
+            data += 3;
+        }
+
+        // MultiByteToWideChar handles UTF-8 and ANSI
+        if(MultiByteToWideChar(CP_UTF8, MB_PRECOMPOSED, data, -1, wideText, wideTextSize / sizeof(WCHAR)) != 0)
+        {
+            success = TRUE;
+        }
+    }
+
+    return success;
+}
+
+//
 // Set the text in g_hwndEdit to the characters specified in data.
 //
 void SetEditText(BYTE * data, size_t dataSize)
@@ -63,15 +112,19 @@ void SetEditText(BYTE * data, size_t dataSize)
     wideText = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, wideTextSize);
     if(wideText)
     {
-        // Convert from UTF-8 to WCHAR. This also handles ANSI, and UTF-8 with BOM too.
-        if(MultiByteToWideChar(CP_UTF8, MB_PRECOMPOSED, data, -1, wideText, wideTextSize / sizeof(WCHAR)) != 0)
+        // Convert the data to a wide string.
+        if(!ConvertBytesToString(data, dataSize, wideText, wideTextSize))
         {
-            // Select all current text in the edit control
-            SendMessage(g_hwndEdit, EM_SETSEL, 0, -1);
-
-            // Replace the selected text in the edit control, or append if none selected 
-            SendMessageW(g_hwndEdit, EM_REPLACESEL, FALSE, (LPARAM)wideText);
+            // If the conversion failed, set wideText to an empty string
+            wideText[0] = 0;
         }
+
+        // Select all current text in the edit control
+        SendMessage(g_hwndEdit, EM_SETSEL, 0, -1);
+
+        // Replace the selected text in the edit control, or append if none selected 
+        SendMessageW(g_hwndEdit, EM_REPLACESEL, FALSE, (LPARAM)wideText);
+
         HeapFree(GetProcessHeap(), 0, wideText);
     }
 
@@ -103,9 +156,10 @@ void SetEditTextFromFile(LPTSTR filePath)
     if(GetFileSizeEx(hFile, &fileSize))
     {
         // Allocate a buffer that is large enough to hold the entire contents
-        // of the file, plus a byte for a null terminator (which will already
-        // be present due to allocating HEAP_ZERO_MEMORY).
-        fileBytesSize = (size_t)fileSize.QuadPart + 1;
+        // of the file, plus two bytes for a null terminator (which will already
+        // be present due to allocating HEAP_ZERO_MEMORY). Only one byte is needed
+        // for the terminator if ANSI/UTF-8, but 2 is needed for UTF-16.
+        fileBytesSize = (size_t)fileSize.QuadPart + 2;
         fileBytes = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, fileBytesSize);
         if(fileBytes)
         {
