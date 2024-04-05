@@ -15,7 +15,7 @@ by: Matthew Justice
 //
 // globals
 //
-LPWSTR g_activeFile = NULL;
+WCHAR g_activeFile[MAX_PATH]= {0};
 
 extern HWND g_hwndMain;
 extern HWND g_hwndEdit;
@@ -157,7 +157,7 @@ void SetEditTextFromFile(LPWSTR filePath)
 
     // If this function fails, there should be no active file.
     // Assume failure until the file is opened successfully.
-    g_activeFile = NULL;
+    ZeroMemory(g_activeFile, sizeof(g_activeFile));
 
     // Open the file
     hFile = CreateFile(filePath, GENERIC_READ, FILE_SHARE_READ,
@@ -184,8 +184,10 @@ void SetEditTextFromFile(LPWSTR filePath)
             {
                 if(SetEditText(fileBytes, fileBytesSize))
                 {
-                    g_activeFile = filePath;
-                    DebugLog(L"Active file is %s", g_activeFile);
+                    if(SUCCEEDED(StringCchCopyW(g_activeFile, MAX_PATH, filePath)))
+                    {
+                        DebugLog(L"Active file is %s", g_activeFile);
+                    }
                 }
                 else
                 {
@@ -202,12 +204,12 @@ void SetEditTextFromFile(LPWSTR filePath)
 }
 
 //
-// MainWndOnOpenFile
+// MainWndOnFileOpen
 // Handles IDM_FILE_OPEN by prompting the user
 // for a file to open, then populating the edit
 // control with the contents of that file.
 //
-void MainWndOnOpenFile(void)
+void MainWndOnFileOpen(void)
 {
     OPENFILENAME ofn;
     WCHAR filePath[MAX_PATH];
@@ -241,6 +243,93 @@ void MainWndOnOpenFile(void)
     if (GetOpenFileName(&ofn))
     {
         SetEditTextFromFile(ofn.lpstrFile);
+    }
+
+    return;
+}
+
+//
+// SaveEditTextToActiveFile
+// Writes the text in the edit control to
+// the file specified in g_activeFile.
+//
+void SaveEditTextToActiveFile()
+{
+    DebugLog(L"Saving to %s", g_activeFile);
+}
+
+//
+// MainWndOnFileSaveAs
+// Handles IDM_FILE_SAVE_AS by prompting the user
+// for a file to save, then writing the contents of 
+// the edit control to that file.
+//
+void MainWndOnFileSaveAs(void)
+{
+    OPENFILENAME ofn;
+    WCHAR filePath[MAX_PATH];
+
+    ZeroMemory(&ofn, sizeof(ofn));
+    ZeroMemory(&filePath, sizeof(filePath));
+
+    // Bring up the File Save Dialog
+    ofn.lStructSize = sizeof(ofn);
+    ofn.hwndOwner = g_hwndMain;
+    ofn.Flags = OFN_HIDEREADONLY;
+    ofn.lpstrDefExt = L"txt";
+
+    // pairs of null-terminated filter strings
+    ofn.lpstrFilter = L"Text files (*.txt)\0*.txt\0All Files (*.*)\0*.*\0";
+    ofn.nFilterIndex = 0;
+
+    // Pointer to a buffer that contains an initial file name 
+    // If lpstrFile contains a path, that path is the initial directory
+    // If first byte is NULL, then no initial path.
+    // On return, contains the user-selected file path.
+    ofn.lpstrFile = filePath;
+    ofn.nMaxFile = MAX_PATH;
+
+    // file name and extension of the selected file
+    // Can be null since we don't need to get the name only
+    ofn.lpstrFileTitle = NULL;
+    ofn.nMaxFileTitle = 0;
+
+    // Dialog box settings
+    ofn.Flags = OFN_PATHMUSTEXIST|OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT;
+
+    // Pointer to a buffer that contains the default extension
+    ofn.lpstrDefExt = L"txt";
+
+    // If the user specifies a file name and clicks the OK button,
+    // the return value is nonzero (TRUE). 
+    if (GetSaveFileName(&ofn))
+    {
+        if(SUCCEEDED(StringCchCopyW(g_activeFile, MAX_PATH, filePath)))
+        {
+            SaveEditTextToActiveFile();
+        }
+    }
+
+    return;
+}
+
+//
+// MainWndOnFileSave
+// Handles IDM_FILE_SAVE by prompting the user
+// for a file to save if needed, and then writing the contents of 
+// the edit control to that file.
+//
+void MainWndOnFileSave(void)
+{
+    if(g_activeFile[0] != 0)
+    {
+        // There's already an active file name. Save there.
+        SaveEditTextToActiveFile();
+    }
+    else
+    {
+        // There's no active file. Treat this as Save As.
+        MainWndOnFileSaveAs();
     }
 
     return;

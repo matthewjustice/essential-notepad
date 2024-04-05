@@ -33,8 +33,10 @@ BOOL InitWindow(int);
 int MsgLoop(void);
 
 // Function prototypes - file.c
-void MainWndOnOpenFile(void);
 void SetEditTextFromFile(LPWSTR filePath);
+void MainWndOnFileOpen(void);
+void MainWndOnFileSaveAs(void);
+void MainWndOnFileSave(void);
 
 // Function prototypes - utility.c
 void DebugLog(const WCHAR * format, ...);
