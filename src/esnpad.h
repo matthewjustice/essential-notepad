@@ -34,6 +34,7 @@ int MsgLoop(void);
 
 // Function prototypes - file.c
 void MainWndOnOpenFile(void);
+void SetEditTextFromFile(LPWSTR filePath);
 
 // Function prototypes - utility.c
 void DebugLog(const char * format, ...);

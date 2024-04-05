@@ -12,6 +12,11 @@ by: Matthew Justice
 #include <strsafe.h>
 #include "esnpad.h"
 
+//
+// globals
+//
+LPWSTR g_activeFile = NULL;
+
 extern HWND g_hwndMain;
 extern HWND g_hwndEdit;
 

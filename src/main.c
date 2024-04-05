@@ -21,6 +21,8 @@ HWND g_hwndStatus = NULL;  // handle to status control
 WCHAR g_nameMainClass[] = L"MainWinClass"; // name of the main window class
 WCHAR g_appTitle[]  = L"Essential Notepad"; // title of the application
 
+extern LPWSTR g_activeFile;
+
 //
 // WinMain
 // program entry point
@@ -31,6 +33,17 @@ int WINAPI WinMain(
     LPSTR lpCmdLine,
     int nShowCmd)
 {
+    int argc = 0;
+    LPWSTR * argv = NULL;
+
+    // Get the command line args
+    argv = CommandLineToArgvW(GetCommandLineW(), &argc);
+    if((argc > 1) && PathFileExistsW(argv[1]))
+    {
+        // The first arg can be a text file name to open
+        g_activeFile = argv[1];
+    }
+
     // Save the value of the main instance handle
     g_hinst = hInstance;
 
@@ -141,6 +154,11 @@ LRESULT MainWndOnCreate(HWND hwnd) {
     {
         // -1 indicates WM_CREATE failure
         return -1;
+    }
+
+    if(g_activeFile)
+    {
+        SetEditTextFromFile(g_activeFile);
     }
 
     return 0;
