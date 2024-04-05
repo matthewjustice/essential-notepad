@@ -105,8 +105,9 @@ BOOL ConvertBytesToString(BYTE * data, size_t dataSize, WCHAR * wideText, size_t
 //
 // Set the text in g_hwndEdit to the characters specified in data.
 //
-void SetEditText(BYTE * data, size_t dataSize)
+BOOL SetEditText(BYTE * data, size_t dataSize)
 {
+    BOOL success = FALSE;
     WCHAR * wideText;
     size_t wideTextSize;
 
@@ -118,7 +119,13 @@ void SetEditText(BYTE * data, size_t dataSize)
     if(wideText)
     {
         // Convert the data to a wide string.
-        if(!ConvertBytesToString(data, dataSize, wideText, wideTextSize))
+        if(ConvertBytesToString(data, dataSize, wideText, wideTextSize))
+        {
+            // Treat the function as successful if we're able to convert the
+            // bytes to a string.
+            success = TRUE;
+        }
+        else 
         {
             // If the conversion failed, set wideText to an empty string
             wideText[0] = 0;
@@ -133,7 +140,7 @@ void SetEditText(BYTE * data, size_t dataSize)
         HeapFree(GetProcessHeap(), 0, wideText);
     }
 
-    return;
+    return success;
 }
 
 //
@@ -147,6 +154,10 @@ void SetEditTextFromFile(LPWSTR filePath)
     BYTE * fileBytes;
     size_t fileBytesSize;
     LARGE_INTEGER fileSize;
+
+    // If this function fails, there should be no active file.
+    // Assume failure until the file is opened successfully.
+    g_activeFile = NULL;
 
     // Open the file
     hFile = CreateFile(filePath, GENERIC_READ, FILE_SHARE_READ,
@@ -171,7 +182,15 @@ void SetEditTextFromFile(LPWSTR filePath)
             // Read all the bytes of the file into fileBytes
             if(ReadAllFileBytes(hFile, fileBytes, fileBytesSize))
             {
-                SetEditText(fileBytes, fileBytesSize);
+                if(SetEditText(fileBytes, fileBytesSize))
+                {
+                    g_activeFile = filePath;
+                    DebugLog(L"Active file is %s", g_activeFile);
+                }
+                else
+                {
+                    DebugLog(L"No active file");
+                }
             }
 
             HeapFree(GetProcessHeap(), 0, fileBytes);
