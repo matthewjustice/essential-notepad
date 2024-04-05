@@ -66,7 +66,7 @@ BOOL ConvertBytesToString(BYTE * data, size_t dataSize, WCHAR * wideText, size_t
     // Detect the encoding
     if(dataSize >= 2 && data[0] == 0xFF && data[1] == 0xFE)
     {
-        DebugLog("UTF-16 LE detected");
+        DebugLog(L"UTF-16 LE detected");
         // The BOM says this is UTF-16 LE (or UTF-32, but ignore that)
         // So just treat the data as wide text and copy it into the output buffer.
         // Start copying from +2 to skip over the BOM bytes.
@@ -77,17 +77,17 @@ BOOL ConvertBytesToString(BYTE * data, size_t dataSize, WCHAR * wideText, size_t
     }
     else if(dataSize >= 2 && data[0] == 0xFE && data[1] == 0xFF)
     {
-        DebugLog("UTF-16 BE is not supported");
+        DebugLog(L"UTF-16 BE is not supported");
         success = FALSE;
     }
     else
     {
-        DebugLog("Treating data as UTF-8 or ANSI");
+        DebugLog(L"Treating data as UTF-8 or ANSI");
 
         // Check for UTF-8 BOM
         if(dataSize >= 3 && data[0] == 0xEF && data[1] == 0xBB && data[2] == 0xBF)
         {
-            DebugLog("\nUTF-8 with BOM detected");
+            DebugLog(L"\nUTF-8 with BOM detected");
             // Move the data pointer past the BOM
             data += 3;
         }

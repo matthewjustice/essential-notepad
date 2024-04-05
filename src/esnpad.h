@@ -37,6 +37,6 @@ void MainWndOnOpenFile(void);
 void SetEditTextFromFile(LPWSTR filePath);
 
 // Function prototypes - utility.c
-void DebugLog(const char * format, ...);
+void DebugLog(const WCHAR * format, ...);
 
 #endif // _ESNPAD_H_

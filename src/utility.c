@@ -17,15 +17,16 @@ by: Matthew Justice
 // A printf style logging function for debug builds
 //
 #ifdef DEBUG
-void DebugLog(const char * format, ...)
+#define DEBUG_LOG_BUFFER_SIZE 1024
+void DebugLog(const WCHAR * format, ...)
 {
     va_list vaArgs;
-    static char buffer[1024];
+    static WCHAR buffer[DEBUG_LOG_BUFFER_SIZE];
 
     va_start(vaArgs, format);
-    if(vsprintf(buffer, format, vaArgs) > 0)
+    if(vswprintf(buffer, DEBUG_LOG_BUFFER_SIZE, format, vaArgs) > 0)
     {
-        OutputDebugStringA(buffer);
+        OutputDebugStringW(buffer);
     }
     va_end(vaArgs);
 }
@@ -33,5 +34,5 @@ void DebugLog(const char * format, ...)
 //
 // Do not log in release builds
 //
-void DebugLog(const char * format, ...) {}
+void DebugLog(const WCHAR * format, ...) {}
 #endif /* DEBUG */
