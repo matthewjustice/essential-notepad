@@ -136,7 +136,7 @@ void SetEditText(BYTE * data, size_t dataSize)
 // Read the text from the specified file path and
 // populate the edit control with that text.
 //
-void SetEditTextFromFile(LPTSTR filePath)
+void SetEditTextFromFile(LPWSTR filePath)
 {
     HANDLE hFile;
     BYTE * fileBytes;
@@ -186,7 +186,7 @@ void SetEditTextFromFile(LPTSTR filePath)
 void MainWndOnOpenFile(void)
 {
     OPENFILENAME ofn;
-    TCHAR filePath[MAX_PATH];
+    WCHAR filePath[MAX_PATH];
 
     ZeroMemory(&ofn, sizeof(ofn));
     ZeroMemory(&filePath, sizeof(filePath));
@@ -195,10 +195,10 @@ void MainWndOnOpenFile(void)
     ofn.lStructSize = sizeof(ofn);
     ofn.hwndOwner = g_hwndMain;
     ofn.Flags = OFN_HIDEREADONLY;
-    ofn.lpstrDefExt = TEXT("txt");
+    ofn.lpstrDefExt = L"txt";
 
     // pairs of null-terminated filter strings
-    ofn.lpstrFilter = TEXT("Text files (*.txt)\0*.txt\0All Files (*.*)\0*.*\0");
+    ofn.lpstrFilter = L"Text files (*.txt)\0*.txt\0All Files (*.*)\0*.*\0";
     ofn.nFilterIndex = 0;
 
     // Pointer to a buffer that contains an initial file name 

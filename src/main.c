@@ -18,8 +18,8 @@ HINSTANCE g_hinst;  // main instance handle
 HWND g_hwndMain;    // handle to main window
 HWND g_hwndEdit = NULL;    // handle to edit control
 HWND g_hwndStatus = NULL;  // handle to status control
-TCHAR g_nameMainClass[] = TEXT("MainWinClass"); // name of the main window class
-TCHAR g_appTitle[]  = TEXT("Essential Notepad"); // title of the application
+WCHAR g_nameMainClass[] = L"MainWinClass"; // name of the main window class
+WCHAR g_appTitle[]  = L"Essential Notepad"; // title of the application
 
 //
 // WinMain
@@ -37,7 +37,7 @@ int WINAPI WinMain(
     // Initialize the window data and register the window class
     if (!InitApp())
     {
-        MessageBox(NULL, TEXT("Error during app init"),
+        MessageBox(NULL, L"Error during app init",
             g_appTitle, MB_ICONERROR);
 
         return -1;
@@ -46,7 +46,7 @@ int WINAPI WinMain(
     // Create the window and display it
     if(!InitWindow(nShowCmd))
     {
-        MessageBox(NULL, TEXT("Error during window init"),
+        MessageBox(NULL, L"Error during window init",
             g_appTitle, MB_ICONERROR);
 
         return -1;
@@ -122,7 +122,7 @@ BOOL InitWindow(int nCmdShow)
 LRESULT MainWndOnCreate(HWND hwnd) {
 
     // Create the edit control window
-    g_hwndEdit = CreateWindowEx(0, TEXT("Edit"), NULL,
+    g_hwndEdit = CreateWindowEx(0, L"Edit", NULL,
         WS_VISIBLE|WS_CHILD|WS_BORDER|WS_VSCROLL|ES_MULTILINE|ES_AUTOHSCROLL|ES_AUTOVSCROLL,
         0, 0, 100, 100, hwnd, (HMENU)IDC_EDIT, g_hinst, NULL);
 
