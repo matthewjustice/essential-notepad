@@ -34,6 +34,9 @@ by: Matthew Justice
 #define ENCODING_UTF_16_LE    3
 #define ENCODING_UTF_16_BE    4
 
+#define UTF16_BOM_BYTES       2
+#define UTF8_BOM_BYTES        3
+
 // Function prototypes - main
 LRESULT CALLBACK MainWndProc(HWND, UINT, WPARAM, LPARAM);
 BOOL InitApp();
