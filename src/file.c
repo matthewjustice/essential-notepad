@@ -16,6 +16,7 @@ by: Matthew Justice
 // globals
 //
 WCHAR g_activeFile[MAX_PATH]= {0};
+int g_fileEncoding = ENCODING_UNSPECIFIED;
 
 extern HWND g_hwndMain;
 extern HWND g_hwndEdit;
@@ -72,12 +73,14 @@ BOOL ConvertBytesToString(BYTE * data, size_t dataSize, WCHAR * wideText, size_t
         // Start copying from +2 to skip over the BOM bytes.
         if(SUCCEEDED(StringCchCopyW(wideText, wideTextSize / sizeof(WCHAR), (LPWSTR)(data+2))))
         {
+            g_fileEncoding = ENCODING_UTF_16_LE;
             success = TRUE;
         }
     }
     else if(dataSize >= 2 && data[0] == 0xFE && data[1] == 0xFF)
     {
         DebugLog(L"UTF-16 BE is not supported");
+        g_fileEncoding = ENCODING_UNSPECIFIED;
         success = FALSE;
     }
     else
@@ -88,8 +91,14 @@ BOOL ConvertBytesToString(BYTE * data, size_t dataSize, WCHAR * wideText, size_t
         if(dataSize >= 3 && data[0] == 0xEF && data[1] == 0xBB && data[2] == 0xBF)
         {
             DebugLog(L"\nUTF-8 with BOM detected");
+            g_fileEncoding = ENCODING_UTF_8_BOM;
             // Move the data pointer past the BOM
             data += 3;
+        }
+        else
+        {
+            // Treat both ANSI and UTF-8 as ENCODING_UTF_8
+            g_fileEncoding = ENCODING_UTF_8;
         }
 
         // MultiByteToWideChar handles UTF-8 and ANSI
@@ -255,7 +264,7 @@ void MainWndOnFileOpen(void)
 //
 void SaveEditTextToActiveFile()
 {
-    DebugLog(L"Saving to %s", g_activeFile);
+    DebugLog(L"Saving text to %s with encoding %d", g_activeFile, g_fileEncoding);
 }
 
 //
@@ -270,7 +279,21 @@ void MainWndOnFileSaveAs(void)
     WCHAR filePath[MAX_PATH];
 
     ZeroMemory(&ofn, sizeof(ofn));
-    ZeroMemory(&filePath, sizeof(filePath));
+
+    // If there's an active file, use it as the default save as file path.
+    if(g_activeFile[0] != 0)
+    {
+        if(FAILED(StringCchCopyW(filePath, MAX_PATH, g_activeFile)))
+        {
+            // Failed to copy the active file, so zero out the filePath buffer.
+            ZeroMemory(&filePath, sizeof(filePath));
+        }
+    }
+    else
+    {
+        // No active file, just zero out the filePath buffer.
+        ZeroMemory(&filePath, sizeof(filePath));
+    }
 
     // Bring up the File Save Dialog
     ofn.lStructSize = sizeof(ofn);
@@ -279,8 +302,19 @@ void MainWndOnFileSaveAs(void)
     ofn.lpstrDefExt = L"txt";
 
     // pairs of null-terminated filter strings
-    ofn.lpstrFilter = L"Text files (*.txt)\0*.txt\0All Files (*.*)\0*.*\0";
-    ofn.nFilterIndex = 0;
+    // These should align with the ENCODING_ constants,
+    // and the first entry in this filter is assigned index 1.
+    ofn.lpstrFilter = L"UTF-8 text file (*.txt)\0*.txt\0UTF-8 (with BOM) text file (*.txt)\0*.txt\0UTF-16 LE text file (*.txt)\0*.txt\0";
+    
+    // Set the default encoding to the one in use, if possible.
+    if(g_fileEncoding == ENCODING_UTF_8 || g_fileEncoding == ENCODING_UTF_8_BOM || g_fileEncoding == ENCODING_UTF_16_LE)
+    {
+        ofn.nFilterIndex = g_fileEncoding;
+    }
+    else
+    {
+        ofn.nFilterIndex = 0;
+    }
 
     // Pointer to a buffer that contains an initial file name 
     // If lpstrFile contains a path, that path is the initial directory
@@ -306,6 +340,7 @@ void MainWndOnFileSaveAs(void)
     {
         if(SUCCEEDED(StringCchCopyW(g_activeFile, MAX_PATH, filePath)))
         {
+            g_fileEncoding = ofn.nFilterIndex;
             SaveEditTextToActiveFile();
         }
     }
