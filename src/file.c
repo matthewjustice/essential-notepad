@@ -285,19 +285,99 @@ BOOL WriteBytesToActiveFile(LPCVOID bytes, DWORD byteCount)
 }
 
 //
+// ConvertWideTextToUTF16
+// Convert wide text string to UTF-16 LE with BOM.
+//
+// widetext is the null-terminated wide text string to convert.
+// wideTextSize is the size if the wideText in bytes
+// writeBytesCount is an output param, the number of bytes that should be written to a file.
+//
+// The function returns a pointer to a UTF-16 encoded array of bytes that can written a file.
+// This returned array should be freed by the caller with HeapFree().
+//
+BYTE * ConvertWideTextToUTF16(LPWSTR wideText, size_t wideTextSize, size_t * writeBytesCount)
+{
+    // Allocate a buffer for the UTF-16 LE text.
+    size_t fileBytesSize = wideTextSize + UTF16_BOM_BYTES;
+    BYTE * fileBytes = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, fileBytesSize);
+    if(fileBytes)
+    {
+        // Set our UTF-16 LE BOM
+        fileBytes[0] = 0xFF;
+        fileBytes[1] = 0xFE;
+
+        // Copy in the wide text, as-is, after the BOM
+        if(SUCCEEDED(StringCchCopy((LPWSTR)(fileBytes+UTF16_BOM_BYTES), fileBytesSize-UTF16_BOM_BYTES, wideText)))
+        {
+            // Tell the caller to write 2 byte less to file since we don't need the (wide) null terminator.
+            *writeBytesCount = fileBytesSize - 2;
+        }
+    }
+
+    return fileBytes;
+}
+
+//
+// ConvertWideTextToUTF8
+// Convert wide text string to UTF-8
+//
+// widetext is the null-terminated wide text string to convert.
+// extraBytes is the number of bytes to reserve at the beginning of the buffer (for a BOM)
+// writeBytesCount is an output param, the number of bytes that should be written to a file.
+//
+// The function returns a pointer to a UTF-8 encoded array of bytes that can written a file.
+// TThis returned array should be freed by the caller with HeapFree().
+//
+BYTE * ConvertWideTextToUTF8(LPWSTR wideText, int extraBytes, size_t * writeBytesCount)
+{
+    // The pointer and count for the data we'll write to the file
+    BYTE * fileBytes = NULL;
+    size_t fileBytesSize = 0;
+
+    // Allocate a buffer for the UTF-8 text.
+    // First, get the required size to hold UTF-8 text. Note that UTF-8 can actually
+    // be larger than wide characters, although this is uncommon.
+    int utf8ByteCount = WideCharToMultiByte(CP_UTF8, 0, wideText, -1, NULL, 0, NULL, NULL);
+
+    // Make sure we got a valid byte count.
+    if(utf8ByteCount == 0)
+    {
+        DebugLog(L"Unable to determine UTF-8 byte count.");
+        *writeBytesCount = 0;
+        return NULL;
+    }
+
+    // Allocate a buffer to hold the file-ready UTF-8 data.
+    fileBytesSize = utf8ByteCount + extraBytes;
+    fileBytes = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, fileBytesSize);
+    if(fileBytes)
+    {
+        // Convert the string.
+        if(WideCharToMultiByte(CP_UTF8, 0, wideText, -1, fileBytes+extraBytes, fileBytesSize-extraBytes, NULL, NULL) != 0)
+        {
+            // Tell the caller to write 1 byte less to file since we don't need the null terminator.
+            *writeBytesCount = fileBytesSize - 1;
+        }
+    }
+
+    return fileBytes;
+}
+
+//
 // SaveEditTextToActiveFile
 // Writes the text in the edit control to
 // the file specified in g_activeFile.
 //
 void SaveEditTextToActiveFile()
 {
+    // The text we will read from the edit control
     int textLength = 0;
     LPWSTR wideText = NULL;
     size_t wideTextSize = 0;
-    BYTE * fileBytes = NULL;
-    size_t fileBytesSize = 0;
-    LPCVOID writeBytesPtr = NULL;
-    DWORD writeBytesCount = 0;
+
+    // The pointer and count that we will pass to WriteBytesToActiveFile
+    BYTE * writeBytesPtr = NULL;
+    size_t writeBytesCount = 0;
 
     DebugLog(L"Saving text to %s with encoding %d", g_activeFile, g_fileEncoding);
 
@@ -312,53 +392,40 @@ void SaveEditTextToActiveFile()
     {
         if(GetWindowText(g_hwndEdit, wideText, wideTextSize / sizeof(WCHAR)) != 0)
         {
-            // We have our wide character text, but the text we write to the file
-            // will be modified, so allocate another buffer for that.
-            // Use the largest possible buffer we might need.
-            fileBytesSize = wideTextSize + UTF8_BOM_BYTES;
-            fileBytes = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, fileBytesSize);
-
-            if(fileBytes)
+            // We have our wide character text. Now encode it.
+            switch (g_fileEncoding)
             {
-                // We now have a buffer to write our file bytes to.
-                switch (g_fileEncoding)
+            case ENCODING_UTF_16_LE:
+                writeBytesPtr = ConvertWideTextToUTF16(wideText, wideTextSize, &writeBytesCount);
+                break;
+            case ENCODING_UTF_8_BOM:
+                // Save as UTF-8 with a BOM
+                writeBytesPtr = ConvertWideTextToUTF8(wideText, UTF8_BOM_BYTES, &writeBytesCount);
+                if(writeBytesPtr)
                 {
-                case ENCODING_UTF_16_LE:
-                    // Set our UTF-16 LE BOM
-                    fileBytes[0] = 0xFF;
-                    fileBytes[1] = 0xFE;
-
-                    // Copy in the wide text, as-is, after the BOM
-                    if(SUCCEEDED(StringCchCopy((LPWSTR)(fileBytes+UTF16_BOM_BYTES), fileBytesSize-UTF16_BOM_BYTES, wideText)))
-                    {
-                        // Write 3 bytes less than the full buffer size, because:
-                        // there's one extra byte for the unused UTF-8 BOM (it is 3 bytes rather than 2),
-                        // and two extra bytes for the wide NULL terminator, which isn't needed in the file.
-                        writeBytesCount = fileBytesSize - 3;
-                        writeBytesPtr = fileBytes;
-                    }
-                    break;
-                case ENCODING_UTF_8_BOM:
                     // Set our UTF-8 BOM
-                    fileBytes[0] = 0xEF;
-                    fileBytes[1] = 0xBB;
-                    fileBytes[1] = 0xBF;
-                    // TODO: Save as UTF-8 with BOM
-                    break;
-                default:
-                    // TODO: Save as UTF-8
-                    break;
+                    writeBytesPtr[0] = 0xEF;
+                    writeBytesPtr[1] = 0xBB;
+                    writeBytesPtr[2] = 0xBF;
                 }
+                break;
+            default:
+                // Save as UTF-8
+                writeBytesPtr = ConvertWideTextToUTF8(wideText, 0, &writeBytesCount);
+                break;
+            }
 
-                // Write the bytes to the active file
-                if(writeBytesPtr && writeBytesCount > 0)
-                {
-                    // TODO: Handle failure
-                    WriteBytesToActiveFile(fileBytes, fileBytesSize-3);
-                }
+            // Write the bytes to the active file
+            if(writeBytesPtr && writeBytesCount > 0)
+            {
+                // TODO: Handle failure
+                WriteBytesToActiveFile(writeBytesPtr, writeBytesCount);
+            }
 
-                // Free our file bytes buffer
-                HeapFree(GetProcessHeap(), 0, fileBytes);
+            // Free our write bytes buffer
+            if(writeBytesPtr)
+            {
+                HeapFree(GetProcessHeap(), 0, writeBytesPtr);
             }
         }
 
