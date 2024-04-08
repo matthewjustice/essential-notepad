@@ -49,9 +49,9 @@ BEGIN
         BLOCK "040904b0"
         BEGIN
             VALUE "LegalCopyright", "2024 Matthew Justice"
-            VALUE "FileDescription", "Essential Notepad"
+            VALUE "FileDescription", APP_TITLE_A
             VALUE "FileVersion", "0.1.0.0"
-            VALUE "ProductName", "Essential Notepad"
+            VALUE "ProductName", APP_TITLE_A
             VALUE "ProductVersion", "0.1.0.0"
             VALUE "CompanyName", "Matthew Justice"
         END

@@ -19,7 +19,6 @@ HWND g_hwndMain;    // handle to main window
 HWND g_hwndEdit = NULL;    // handle to edit control
 HWND g_hwndStatus = NULL;  // handle to status control
 WCHAR g_nameMainClass[] = L"MainWinClass"; // name of the main window class
-WCHAR g_appTitle[]  = L"Essential Notepad"; // title of the application
 LPWSTR g_cmdLineFile = NULL;
 
 
@@ -51,7 +50,7 @@ int WINAPI WinMain(
     if (!InitApp())
     {
         MessageBox(NULL, L"Error during app init",
-            g_appTitle, MB_ICONERROR);
+            APP_TITLE_W, MB_ICONERROR);
 
         return -1;
     }
@@ -60,7 +59,7 @@ int WINAPI WinMain(
     if(!InitWindow(nShowCmd))
     {
         MessageBox(NULL, L"Error during window init",
-            g_appTitle, MB_ICONERROR);
+            APP_TITLE_W, MB_ICONERROR);
 
         return -1;
     }
@@ -113,7 +112,7 @@ BOOL InitApp()
 BOOL InitWindow(int nCmdShow)
 {
     // create the main window
-    g_hwndMain = CreateWindowEx(0, g_nameMainClass, g_appTitle,
+    g_hwndMain = CreateWindowEx(0, g_nameMainClass, APP_TITLE_W,
         WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 500, 400,
         NULL, NULL, g_hinst, 0);
 

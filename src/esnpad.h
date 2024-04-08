@@ -17,6 +17,9 @@ by: Matthew Justice
 #define IDC_STATUS         101
 #define CB_BUFFER          512
 
+#define APP_TITLE_A        "Essential Notepad"
+#define APP_TITLE_W        L"Essential Notepad"
+
 // Resource constants
 #define IDR_MENUMAIN       200
 #define IDR_ACCELMAIN      201
@@ -36,6 +39,14 @@ by: Matthew Justice
 
 #define UTF16_BOM_BYTES       2
 #define UTF8_BOM_BYTES        3
+
+// The max size of the window title, in bytes.
+// This needs to accomodate a file name (which will be < MAX_PATH)
+// + the name of the app (18 wchars) + a separator (3 wchars)
+// + an indicator to show if the file is currently being edited.
+// I'm rounding all of that up to 32.
+// Multiply all by 2 to account for wide chars.
+#define CB_WINDOW_TITLE       ((MAX_PATH + 32) * 2)
 
 // Function prototypes - main
 LRESULT CALLBACK MainWndProc(HWND, UINT, WPARAM, LPARAM);

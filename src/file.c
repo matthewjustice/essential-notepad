@@ -9,6 +9,7 @@ by: Matthew Justice
 ---------------------------------------------------------------*/
 
 #include <windows.h>
+#include <shlwapi.h>
 #include <strsafe.h>
 #include "esnpad.h"
 
@@ -20,6 +21,52 @@ int g_fileEncoding = ENCODING_UNSPECIFIED;
 
 extern HWND g_hwndMain;
 extern HWND g_hwndEdit;
+
+//
+// SetActiveFile
+// Sets the active file in global memory, and
+// updates the window title to include the file name.
+//
+BOOL SetActiveFile(LPWSTR filePath)
+{
+    BOOL success = FALSE;
+    LPWSTR fileName;
+    LPWSTR windowTitle;
+
+    // Copy the specified filePath into the active file global
+    if(SUCCEEDED(StringCchCopyW(g_activeFile, MAX_PATH, filePath)))
+    {
+        // Get a pointer to the the file name in the path.
+        fileName = PathFindFileNameW(filePath);
+
+        // Allocate a buffer to hold the new window title.
+        windowTitle = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, CB_WINDOW_TITLE);
+        if(windowTitle)
+        {
+            // Generate a window title that contains the file name and app name
+            if(SUCCEEDED(StringCchPrintf(windowTitle, CB_WINDOW_TITLE, L"%s - %s", fileName, APP_TITLE_W)))
+            {
+                // Set the window title
+                if(SetWindowText(g_hwndMain, windowTitle))
+                {
+                    success = TRUE;
+                }
+            }
+
+            HeapFree(GetProcessHeap(), 0, windowTitle);
+        }
+    }
+
+    if(!success)
+    {
+        // We weren't able to set the active file or the window title.
+        // Set the window title to only the app name so we don't
+        // accidentally show the wrong file name in the title.
+        SetWindowText(g_hwndMain, APP_TITLE_W);
+    }
+
+    return success;
+}
 
 //
 // ReadAllFileBytes
@@ -193,7 +240,7 @@ void SetEditTextFromFile(LPWSTR filePath)
             {
                 if(SetEditText(fileBytes, fileBytesSize))
                 {
-                    if(SUCCEEDED(StringCchCopyW(g_activeFile, MAX_PATH, filePath)))
+                    if(SetActiveFile(filePath))
                     {
                         DebugLog(L"Active file is %s", g_activeFile);
                     }
@@ -507,7 +554,7 @@ void MainWndOnFileSaveAs(void)
     // the return value is nonzero (TRUE). 
     if (GetSaveFileName(&ofn))
     {
-        if(SUCCEEDED(StringCchCopyW(g_activeFile, MAX_PATH, filePath)))
+        if(SetActiveFile(filePath))
         {
             g_fileEncoding = ofn.nFilterIndex;
             SaveEditTextToActiveFile();
