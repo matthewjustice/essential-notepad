@@ -193,6 +193,36 @@ LRESULT MainWndOnResize(int width, int height)
 }
 
 //
+// ConfirmSaveChanges
+// If the edit text is dirty, ask the user if they want to save
+// it before continuing.
+// The function returns TRUE if the caller should continue with
+// whatever they were planning on doing. A return of FALSE means
+// to cancel the caller's intended operation.
+//
+BOOL ConfirmSaveChanges(void)
+{
+    if(!g_dirtyText)
+    {
+        // When the edit text is clean, there's nothing for us to do
+        // here, and the caller should continue as usual.
+        return TRUE;
+    }
+
+    // Prompt the user for what they want to do.
+    int result = MessageBox(g_hwndMain, L"Do you want to save your changes?",
+        APP_TITLE_W, MB_YESNOCANCEL|MB_ICONQUESTION|MB_DEFBUTTON1|MB_APPLMODAL);
+
+    if(result == IDYES)
+    {
+        // The user wants to save
+        MainWndOnFileSave();
+    }
+
+    return (result != IDCANCEL);
+}
+
+//
 // UpdateDirtyIndicator
 // If the edit control text is dirty, the title
 // of the main window should show a leading indicator
@@ -271,7 +301,10 @@ LRESULT MainWndOnCommand(HWND hwnd, int id, int code)
     switch(id)
     {
     case IDM_FILE_OPEN:
-        MainWndOnFileOpen();
+        if(ConfirmSaveChanges())
+        {
+            MainWndOnFileOpen();
+        }
         break;
     case IDM_FILE_SAVE:
         MainWndOnFileSave();
@@ -280,7 +313,10 @@ LRESULT MainWndOnCommand(HWND hwnd, int id, int code)
         MainWndOnFileSaveAs();
         break;
     case IDM_FILE_EXIT:
-        SendMessage(hwnd, WM_CLOSE, 0, 0);
+        if(ConfirmSaveChanges())
+        {
+            SendMessage(hwnd, WM_CLOSE, 0, 0);
+        }
         break;
     case IDC_EDIT:
         EditControlOnCommand(code);
@@ -314,7 +350,10 @@ LRESULT CALLBACK MainWndProc(
         result = MainWndOnCommand(hwnd, (int)LOWORD(wparam), (int)HIWORD(wparam));
         break;
     case WM_CLOSE:
-        DestroyWindow(hwnd); // if the main window is closed, destroy it
+        if(ConfirmSaveChanges())
+        {
+            DestroyWindow(hwnd); // if the main window is closed, destroy it
+        }
         break;
     case WM_DESTROY:
         PostQuitMessage(0); // quit the program by posting a WM_QUIT
