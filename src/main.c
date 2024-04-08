@@ -23,6 +23,8 @@ WCHAR g_nameMainClass[] = L"MainWinClass"; // name of the main window class
 LPWSTR g_cmdLineFile = NULL;
 BOOL g_dirtyText = FALSE;   // "dirty" means text changes haven't been saved
 
+extern WCHAR g_activeFile[MAX_PATH];
+
 
 //
 // WinMain
@@ -293,6 +295,28 @@ void EditControlOnCommand(int code)
 }
 
 //
+// MainWndOnFileNew
+// Handles IDM_FILE_NEW by clearing the edit control
+// and resetting state back to no active file.
+//
+void MainWndOnFileNew(void)
+{
+    // Clear the edit control
+    SetWindowText(g_hwndEdit, L"");
+
+    // Set the app title back to the default (no filename or dirty indicator)
+    SetWindowText(g_hwndMain, APP_TITLE_W);
+
+    // The text isn't dirty, since there is none.
+    g_dirtyText = FALSE;
+
+    // There is no active file.
+    ZeroMemory(g_activeFile, sizeof(g_activeFile));
+
+    return;
+}
+
+//
 // MainWndOnCommand
 // Handles WM_COMMAND for the main window
 //
@@ -300,6 +324,12 @@ LRESULT MainWndOnCommand(HWND hwnd, int id, int code)
 {
     switch(id)
     {
+    case IDM_FILE_NEW:
+        if(ConfirmSaveChanges())
+        {
+            MainWndOnFileNew();
+        }
+        break;
     case IDM_FILE_OPEN:
         if(ConfirmSaveChanges())
         {
