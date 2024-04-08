@@ -21,6 +21,7 @@ int g_fileEncoding = ENCODING_UNSPECIFIED;
 
 extern HWND g_hwndMain;
 extern HWND g_hwndEdit;
+extern BOOL g_dirtyText;
 
 //
 // SetActiveFile
@@ -240,6 +241,9 @@ void SetEditTextFromFile(LPWSTR filePath)
             {
                 if(SetEditText(fileBytes, fileBytesSize))
                 {
+                    // When the edit text is first set from file, it is clean.
+                    g_dirtyText = FALSE;
+
                     if(SetActiveFile(filePath))
                     {
                         DebugLog(L"Active file is %s", g_activeFile);
@@ -466,7 +470,11 @@ void SaveEditTextToActiveFile()
             if(writeBytesPtr && writeBytesCount > 0)
             {
                 // TODO: Handle failure
-                WriteBytesToActiveFile(writeBytesPtr, writeBytesCount);
+                if(WriteBytesToActiveFile(writeBytesPtr, writeBytesCount))
+                {
+                    // When the edit text is initially written to file, it is clean.
+                    g_dirtyText = FALSE;
+                }
             }
 
             // Free our write bytes buffer
@@ -576,6 +584,9 @@ void MainWndOnFileSave(void)
     {
         // There's already an active file name. Save there.
         SaveEditTextToActiveFile();
+
+        // Clear the dirty indicator in the window title.
+        UpdateTitleDirtyIndicator();
     }
     else
     {

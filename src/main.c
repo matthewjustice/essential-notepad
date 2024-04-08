@@ -9,6 +9,7 @@ by: Matthew Justice
 
 #include <windows.h>
 #include <commctrl.h>
+#include <strsafe.h>
 #include "esnpad.h"
 
 //
@@ -20,6 +21,7 @@ HWND g_hwndEdit = NULL;    // handle to edit control
 HWND g_hwndStatus = NULL;  // handle to status control
 WCHAR g_nameMainClass[] = L"MainWinClass"; // name of the main window class
 LPWSTR g_cmdLineFile = NULL;
+BOOL g_dirtyText = FALSE;   // "dirty" means text changes haven't been saved
 
 
 //
@@ -191,10 +193,80 @@ LRESULT MainWndOnResize(int width, int height)
 }
 
 //
+// UpdateDirtyIndicator
+// If the edit control text is dirty, the title
+// of the main window should show a leading indicator
+// that tells the user this is the case. This function
+// makes sure the title text is aligned with g_dirtyText.
+//
+void UpdateTitleDirtyIndicator(void)
+{
+    // Allocate buffers to hold the old and new window titles.
+    LPWSTR oldWindowTitle = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, CB_WINDOW_TITLE);
+    LPWSTR newWindowTitle = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, CB_WINDOW_TITLE);
+    if(oldWindowTitle && newWindowTitle)
+    {
+        // Get the current main window title as the "old" window title
+        if(GetWindowText(g_hwndMain, oldWindowTitle, CB_WINDOW_TITLE / sizeof(WCHAR)) != 0)
+        {
+            if(g_dirtyText)
+            {
+                // Format the new window title as the old one with a leading indicator.
+                if(SUCCEEDED(StringCchPrintf(newWindowTitle, CB_WINDOW_TITLE, L"* %s", oldWindowTitle)))
+                {
+                    // Set the window title.
+                    SetWindowText(g_hwndMain, newWindowTitle);
+                }
+            }
+            else
+            {
+                // The text isn't dirty, so remove the indicator, if it's there.
+                if(oldWindowTitle[0] == '*' && oldWindowTitle[1] == ' ')
+                {
+                    // Set the window title as the old title, but without the leading "* "
+                    SetWindowText(g_hwndMain, oldWindowTitle+2);
+                }
+            }
+        }
+    }
+
+    // Free memory if needed.
+    if(oldWindowTitle)
+    {
+        HeapFree(GetProcessHeap(), 0, oldWindowTitle);
+    }
+
+    if(newWindowTitle)
+    {
+        HeapFree(GetProcessHeap(), 0, newWindowTitle);
+    }
+
+    return;
+}
+
+//
+// Handles WM_COMMAND for the edit control
+//
+void EditControlOnCommand(int code)
+{
+    // When the text of the edit control changes, make it as dirty
+    // (meaning it isn't in sync with the active file), and update
+    // the main window title to show dirty indicator. We only need
+    // to do this if it isn't already marked as dirty.
+    if((code == EN_CHANGE) && !g_dirtyText)
+    {
+        g_dirtyText = TRUE;
+        UpdateTitleDirtyIndicator();
+    }
+
+    return;
+}
+
+//
 // MainWndOnCommand
 // Handles WM_COMMAND for the main window
 //
-LRESULT MainWndOnCommand(HWND hwnd, int id)
+LRESULT MainWndOnCommand(HWND hwnd, int id, int code)
 {
     switch(id)
     {
@@ -209,6 +281,9 @@ LRESULT MainWndOnCommand(HWND hwnd, int id)
         break;
     case IDM_FILE_EXIT:
         SendMessage(hwnd, WM_CLOSE, 0, 0);
+        break;
+    case IDC_EDIT:
+        EditControlOnCommand(code);
         break;
     }
 
@@ -236,7 +311,7 @@ LRESULT CALLBACK MainWndProc(
         result = MainWndOnResize((int)LOWORD(lparam), (int)HIWORD(lparam));
         break;
     case WM_COMMAND:
-        result = MainWndOnCommand(hwnd, (int)LOWORD(wparam));
+        result = MainWndOnCommand(hwnd, (int)LOWORD(wparam), (int)HIWORD(wparam));
         break;
     case WM_CLOSE:
         DestroyWindow(hwnd); // if the main window is closed, destroy it

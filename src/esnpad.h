@@ -53,6 +53,7 @@ LRESULT CALLBACK MainWndProc(HWND, UINT, WPARAM, LPARAM);
 BOOL InitApp();
 BOOL InitWindow(int);
 int MsgLoop(void);
+void UpdateTitleDirtyIndicator(void);
 
 // Function prototypes - file.c
 void SetEditTextFromFile(LPWSTR filePath);
