@@ -2,7 +2,7 @@
 A basic Notepad implementation for Windows
 
 ## About
-With all the new features in Notepad for Windows 11, I thought it might be nice to reimplement "classic" Notepad. Why? Just because I like programming in C using the Windows API. Also, maybe someone will the code helpful as an example.
+With all the new features in Notepad for Windows 11, I thought it might be nice to reimplement "classic" Notepad. Why? Just because I like programming in C using the Windows API. Also, maybe someone will find the code helpful as an example.
 
 ## Status
 This is a work in progress. The current code should work fine, but it isn't feature complete.
