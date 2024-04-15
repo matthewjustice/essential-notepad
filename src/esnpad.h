@@ -49,6 +49,10 @@ by: Matthew Justice
 // Multiply all by 2 to account for wide chars.
 #define CB_WINDOW_TITLE       ((MAX_PATH + 32) * 2)
 
+// The max size of a prompt message, in bytes.
+// Large enough to hold the prompt message and a file name.
+#define CB_PROMPT_MESSAGE     512
+
 // Function prototypes - main
 LRESULT CALLBACK MainWndProc(HWND, UINT, WPARAM, LPARAM);
 BOOL InitApp();

@@ -9,6 +9,7 @@ by: Matthew Justice
 
 #include <windows.h>
 #include <commctrl.h>
+#include <shlwapi.h>
 #include <strsafe.h>
 #include "esnpad.h"
 
@@ -207,9 +208,37 @@ BOOL ConfirmSaveChanges(void)
         return TRUE;
     }
 
+    // Allocate a buffer to hold the prompt message
+    LPWSTR prompt = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, CB_PROMPT_MESSAGE);
+
+    if(!prompt)
+    {
+        // If we can't allocate memory, just return TRUE.
+        // The caller should continue as usual.
+        return TRUE;
+    }
+
+    if(g_activeFile[0] != 0)
+    {
+        // There's an active file, so include its name in the prompt.
+        // Get the filename part of the path
+        LPWSTR fileName = PathFindFileNameW(g_activeFile);
+
+        // Format the prompt message
+        StringCchPrintf(prompt, CB_PROMPT_MESSAGE, L"Do you want to save your changes to %s?", fileName);
+    }
+    else
+    {
+        // There's no active file, so the prompt is generic.
+        StringCchCopy(prompt, CB_PROMPT_MESSAGE, L"Do you want to save your changes?");
+    }
+
     // Prompt the user for what they want to do.
-    int result = MessageBox(g_hwndMain, L"Do you want to save your changes?",
+    int result = MessageBox(g_hwndMain, prompt,
         APP_TITLE_W, MB_YESNOCANCEL|MB_ICONQUESTION|MB_DEFBUTTON1|MB_APPLMODAL);
+
+    // Free the memory we allocated for the prompt message
+    HeapFree(GetProcessHeap(), 0, prompt);
 
     if(result == IDYES)
     {
