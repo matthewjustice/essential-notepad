@@ -138,11 +138,7 @@ BOOL InitWindow(int nCmdShow)
 LRESULT MainWndOnCreate(HWND hwnd) {
 
     // Create the edit control window
-    g_hwndEdit = CreateWindowEx(0, L"Edit", NULL,
-        WS_VISIBLE|WS_CHILD|WS_BORDER|WS_VSCROLL|ES_MULTILINE|ES_AUTOHSCROLL|ES_AUTOVSCROLL,
-        0, 0, 100, 100, hwnd, (HMENU)IDC_EDIT, g_hinst, NULL);
-
-    if(!g_hwndEdit)
+    if(!CreateEditControl(hwnd, TRUE))
     {
         // -1 indicates WM_CREATE failure
         return -1;
@@ -317,6 +313,44 @@ void MainWndOnFileNew(void)
 }
 
 //
+// MainWndOnViewWordWrap
+// Handles IDM_VIEW_WORDWRAP by toggling the check box on the menu,
+// and creating a new edit control with the new word wrap setting.
+//
+void MainWndOnViewWordWrap(void)
+{
+    HMENU hMenu = GetMenu(g_hwndMain);
+    UINT state = GetMenuState(hMenu, IDM_VIEW_WORDWRAP, MF_BYCOMMAND);
+
+    // Check if the menu item is checked
+    BOOL checked = state & MF_CHECKED;
+
+    // Get the current style of the edit control
+    DWORD style = GetWindowLong(g_hwndEdit, GWL_STYLE);
+
+    if (checked)
+    {
+        // Word wrap is on, turn it off
+        style |= ES_AUTOHSCROLL;
+        CheckMenuItem(GetMenu(g_hwndMain), IDM_VIEW_WORDWRAP, MF_UNCHECKED);
+    }
+    else
+    {
+        // Word wrap is off, turn it on
+        style &= ~ES_AUTOHSCROLL;
+        CheckMenuItem(GetMenu(g_hwndMain), IDM_VIEW_WORDWRAP, MF_CHECKED);
+    }
+
+    // Create a new edit control with the new word wrap setting
+    // This is necessary because the ES_AUTOHSCROLL style can't be changed.
+    // Note that we are passing in !checked, because the new state is the opposite
+    // of what it was when the user clicked the menu item.
+    CreateEditControl(g_hwndMain, !checked);
+
+    return;
+}
+
+//
 // MainWndOnCommand
 // Handles WM_COMMAND for the main window
 //
@@ -347,6 +381,9 @@ LRESULT MainWndOnCommand(HWND hwnd, int id, int code)
         {
             SendMessage(hwnd, WM_CLOSE, 0, 0);
         }
+        break;
+    case IDM_VIEW_WORDWRAP:
+        MainWndOnViewWordWrap();
         break;
     case IDC_EDIT:
         EditControlOnCommand(code);

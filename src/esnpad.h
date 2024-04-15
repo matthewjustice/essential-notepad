@@ -28,6 +28,7 @@ by: Matthew Justice
 #define IDM_FILE_SAVE      302
 #define IDM_FILE_SAVE_AS   303
 #define IDM_FILE_EXIT      304
+#define IDM_VIEW_WORDWRAP  305
 
 // File related constants
 #define ENCODING_UNSPECIFIED -1
@@ -60,6 +61,9 @@ void SetEditTextFromFile(LPWSTR filePath);
 void MainWndOnFileOpen(void);
 void MainWndOnFileSaveAs(void);
 void MainWndOnFileSave(void);
+
+// Function prototypes - edit.c
+BOOL CreateEditControl(HWND hwndParent, BOOL wordWrap);
 
 // Function prototypes - utility.c
 void DebugLog(const WCHAR * format, ...);
