@@ -22,6 +22,10 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "E&xit",                       IDM_FILE_EXIT
     END
+    POPUP "&View"
+    BEGIN
+        MENUITEM "Word &Wrap",                  IDM_VIEW_WORDWRAP, CHECKED
+    END
 END
 
 IDR_ACCELMAIN ACCELERATORS DISCARDABLE 

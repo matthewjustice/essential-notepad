@@ -194,6 +194,10 @@ BOOL SetEditText(BYTE * data, size_t dataSize)
         // Replace the selected text in the edit control, or append if none selected 
         SendMessageW(g_hwndEdit, EM_REPLACESEL, FALSE, (LPARAM)wideText);
 
+        // Scroll the edit control to the top
+        SendMessage(g_hwndEdit, EM_SETSEL, 0, 0);
+        SendMessage(g_hwndEdit, EM_SCROLLCARET, 0, 0);
+
         HeapFree(GetProcessHeap(), 0, wideText);
     }
 
