@@ -160,51 +160,6 @@ BOOL ConvertBytesToString(BYTE * data, size_t dataSize, WCHAR * wideText, size_t
 }
 
 //
-// Set the text in g_hwndEdit to the characters specified in data.
-//
-BOOL SetEditText(BYTE * data, size_t dataSize)
-{
-    BOOL success = FALSE;
-    WCHAR * wideText;
-    size_t wideTextSize;
-
-    // Allocate a buffer for holding our text as wide characters.
-    // It needs to be 2 times the size of the file, since worst-case
-    // each UTF-8 byte expands to a wide char.
-    wideTextSize = dataSize * 2;
-    wideText = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, wideTextSize);
-    if(wideText)
-    {
-        // Convert the data to a wide string.
-        if(ConvertBytesToString(data, dataSize, wideText, wideTextSize))
-        {
-            // Treat the function as successful if we're able to convert the
-            // bytes to a string.
-            success = TRUE;
-        }
-        else 
-        {
-            // If the conversion failed, set wideText to an empty string
-            wideText[0] = 0;
-        }
-
-        // Select all current text in the edit control
-        SendMessage(g_hwndEdit, EM_SETSEL, 0, -1);
-
-        // Replace the selected text in the edit control, or append if none selected 
-        SendMessageW(g_hwndEdit, EM_REPLACESEL, FALSE, (LPARAM)wideText);
-
-        // Scroll the edit control to the top
-        SendMessage(g_hwndEdit, EM_SETSEL, 0, 0);
-        SendMessage(g_hwndEdit, EM_SCROLLCARET, 0, 0);
-
-        HeapFree(GetProcessHeap(), 0, wideText);
-    }
-
-    return success;
-}
-
-//
 // SetEditTextFromFile
 // Read the text from the specified file path and
 // populate the edit control with that text.

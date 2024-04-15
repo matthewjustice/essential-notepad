@@ -64,6 +64,7 @@ void MainWndOnFileSave(void);
 
 // Function prototypes - edit.c
 BOOL CreateEditControl(HWND hwndParent, BOOL wordWrap);
+BOOL SetEditText(BYTE * data, size_t dataSize);
 
 // Function prototypes - utility.c
 void DebugLog(const WCHAR * format, ...);
