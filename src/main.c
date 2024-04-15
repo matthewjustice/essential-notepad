@@ -406,10 +406,7 @@ LRESULT MainWndOnCommand(HWND hwnd, int id, int code)
         MainWndOnFileSaveAs();
         break;
     case IDM_FILE_EXIT:
-        if(ConfirmSaveChanges())
-        {
-            SendMessage(hwnd, WM_CLOSE, 0, 0);
-        }
+        SendMessage(hwnd, WM_CLOSE, 0, 0);
         break;
     case IDM_VIEW_WORDWRAP:
         MainWndOnViewWordWrap();
