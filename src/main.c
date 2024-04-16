@@ -380,6 +380,36 @@ void MainWndOnViewWordWrap(void)
 }
 
 //
+// MainWndOnViewDarkMode
+// Handles IDM_VIEW_DARKMODE by toggling the check box on the menu,
+// and updating the edit control colors.
+//
+void MainWndOnViewDarkMode(void)
+{
+    HMENU hMenu = GetMenu(g_hwndMain);
+    UINT darkModeMenuState = GetMenuState(hMenu, IDM_VIEW_DARKMODE, MF_BYCOMMAND);
+    UINT wordWrapState = GetMenuState(hMenu, IDM_VIEW_WORDWRAP, MF_BYCOMMAND);
+
+    if (darkModeMenuState & MF_CHECKED)
+    {
+        // Dark mode is on, turn it off in the menu
+        CheckMenuItem(GetMenu(g_hwndMain), IDM_VIEW_DARKMODE, MF_UNCHECKED);
+    }
+    else
+    {
+        // Dark mode is off, turn it on in the menu
+        CheckMenuItem(GetMenu(g_hwndMain), IDM_VIEW_DARKMODE, MF_CHECKED);
+    }
+
+    // Create a new edit control, preserving the current word wrap setting.
+    // This is necessary because we need to trigger another WM_CTLCOLOREDIT,
+    // which will set the new colors based on the new dark mode menu setting.
+    CreateEditControl(g_hwndMain, (wordWrapState & MF_CHECKED));
+
+    return;
+}
+
+//
 // MainWndOnCommand
 // Handles WM_COMMAND for the main window
 //
@@ -411,6 +441,9 @@ LRESULT MainWndOnCommand(HWND hwnd, int id, int code)
     case IDM_VIEW_WORDWRAP:
         MainWndOnViewWordWrap();
         break;
+    case IDM_VIEW_DARKMODE:
+        MainWndOnViewDarkMode();
+        break;
     case IDC_EDIT:
         EditControlOnCommand(code);
         break;
@@ -441,6 +474,9 @@ LRESULT CALLBACK MainWndProc(
         break;
     case WM_COMMAND:
         result = MainWndOnCommand(hwnd, (int)LOWORD(wparam), (int)HIWORD(wparam));
+        break;
+    case WM_CTLCOLOREDIT:
+        result = MainWndOnControlColorEdit((HDC)wparam);
         break;
     case WM_CLOSE:
         if(ConfirmSaveChanges())
