@@ -25,6 +25,7 @@ BEGIN
     POPUP "&View"
     BEGIN
         MENUITEM "Word &Wrap",                  IDM_VIEW_WORDWRAP, CHECKED
+        MENUITEM "&Dark Mode",                  IDM_VIEW_DARKMODE, CHECKED
     END
 END
 

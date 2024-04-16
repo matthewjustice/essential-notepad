@@ -11,6 +11,7 @@ by: Matthew Justice
 #include <stdbool.h>
 #include "esnpad.h"
 
+extern HWND g_hwndMain;
 extern HWND g_hwndEdit;
 extern HINSTANCE g_hinst;
 
@@ -125,12 +126,21 @@ BOOL SetEditText(BYTE * data, size_t dataSize)
 //
 LRESULT MainWndOnControlColorEdit(HDC hdc)
 {
+    COLORREF textColor;
+    COLORREF backgroundColor;
+
+    HMENU hMenu = GetMenu(g_hwndMain);
+    UINT darkModeMenuState = GetMenuState(hMenu, IDM_VIEW_DARKMODE, MF_BYCOMMAND);
+
+    textColor = (darkModeMenuState & MF_CHECKED) ? DARK_MODE_TEXT_COLOR : LIGHT_MODE_TEXT_COLOR;
+    backgroundColor = (darkModeMenuState & MF_CHECKED) ? DARK_MODE_BACKGROUND_COLOR : LIGHT_MODE_BACKGROUND_COLOR;
+
     // Set the text color
-    SetTextColor(hdc, DARK_MODE_TEXT_COLOR);
+    SetTextColor(hdc, textColor);
 
     // Set the background color
-    SetBkColor(hdc, DARK_MODE_BACKGROUND_COLOR); // Dark color
+    SetBkColor(hdc, backgroundColor); // Dark color
 
     // Return a brush with the new background color
-    return (LRESULT) CreateSolidBrush(DARK_MODE_BACKGROUND_COLOR);
+    return (LRESULT) CreateSolidBrush(backgroundColor);
 }

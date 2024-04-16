@@ -29,6 +29,7 @@ by: Matthew Justice
 #define IDM_FILE_SAVE_AS   303
 #define IDM_FILE_EXIT      304
 #define IDM_VIEW_WORDWRAP  305
+#define IDM_VIEW_DARKMODE  306
 
 // File related constants
 #define ENCODING_UNSPECIFIED -1
@@ -56,6 +57,10 @@ by: Matthew Justice
 // Colors for dark mode
 #define DARK_MODE_TEXT_COLOR        RGB(0xCC, 0xCC, 0xCC)
 #define DARK_MODE_BACKGROUND_COLOR  RGB(0x1F, 0x1F, 0x1F)
+
+// Colors for light mode
+#define LIGHT_MODE_TEXT_COLOR        RGB(0x00, 0x00, 0x00)
+#define LIGHT_MODE_BACKGROUND_COLOR  RGB(0xFF, 0xFF, 0xFF)
 
 // Function prototypes - main
 LRESULT CALLBACK MainWndProc(HWND, UINT, WPARAM, LPARAM);
