@@ -348,25 +348,19 @@ void MainWndOnFileNew(void)
 //
 void MainWndOnViewWordWrap(void)
 {
-    HMENU hMenu = GetMenu(g_hwndMain);
-    UINT state = GetMenuState(hMenu, IDM_VIEW_WORDWRAP, MF_BYCOMMAND);
+    UINT wordWrapState = GetMenuState(GetMenu(g_hwndMain), IDM_VIEW_WORDWRAP, MF_BYCOMMAND);
 
     // Check if the menu item is checked
-    BOOL checked = state & MF_CHECKED;
-
-    // Get the current style of the edit control
-    DWORD style = GetWindowLong(g_hwndEdit, GWL_STYLE);
+    BOOL checked = wordWrapState & MF_CHECKED;
 
     if (checked)
     {
-        // Word wrap is on, turn it off
-        style |= ES_AUTOHSCROLL;
+        // Word wrap is on, turn it off in the menu
         CheckMenuItem(GetMenu(g_hwndMain), IDM_VIEW_WORDWRAP, MF_UNCHECKED);
     }
     else
     {
-        // Word wrap is off, turn it on
-        style &= ~ES_AUTOHSCROLL;
+        // Word wrap is off, turn it on in the menu
         CheckMenuItem(GetMenu(g_hwndMain), IDM_VIEW_WORDWRAP, MF_CHECKED);
     }
 
