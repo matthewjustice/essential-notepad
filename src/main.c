@@ -442,6 +442,9 @@ LRESULT CALLBACK MainWndProc(
     case WM_COMMAND:
         result = MainWndOnCommand(hwnd, (int)LOWORD(wparam), (int)HIWORD(wparam));
         break;
+    case WM_CTLCOLOREDIT:
+        result = MainWndOnControlColorEdit((HDC)wparam);
+        break;
     case WM_CLOSE:
         if(ConfirmSaveChanges())
         {

@@ -118,3 +118,19 @@ BOOL SetEditText(BYTE * data, size_t dataSize)
 
     return success;
 }
+
+//
+// MainWndOnControlColorEdit
+// Handles the WM_CTLCOLOREDIT message for the edit control.
+//
+LRESULT MainWndOnControlColorEdit(HDC hdc)
+{
+    // Set the text color
+    SetTextColor(hdc, DARK_MODE_TEXT_COLOR);
+
+    // Set the background color
+    SetBkColor(hdc, DARK_MODE_BACKGROUND_COLOR); // Dark color
+
+    // Return a brush with the new background color
+    return (LRESULT) CreateSolidBrush(DARK_MODE_BACKGROUND_COLOR);
+}

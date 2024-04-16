@@ -53,6 +53,10 @@ by: Matthew Justice
 // Large enough to hold the prompt message and a file name.
 #define CB_PROMPT_MESSAGE     512
 
+// Colors for dark mode
+#define DARK_MODE_TEXT_COLOR        RGB(0xCC, 0xCC, 0xCC)
+#define DARK_MODE_BACKGROUND_COLOR  RGB(0x1F, 0x1F, 0x1F)
+
 // Function prototypes - main
 LRESULT CALLBACK MainWndProc(HWND, UINT, WPARAM, LPARAM);
 BOOL InitApp();
@@ -69,6 +73,7 @@ void MainWndOnFileSave(void);
 // Function prototypes - edit.c
 BOOL CreateEditControl(HWND hwndParent, BOOL wordWrap);
 BOOL SetEditText(BYTE * data, size_t dataSize);
+LRESULT MainWndOnControlColorEdit(HDC hdc);
 
 // Function prototypes - utility.c
 void DebugLog(const WCHAR * format, ...);
