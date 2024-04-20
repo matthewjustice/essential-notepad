@@ -37,6 +37,9 @@ int WINAPI WinMain(
     LPSTR lpCmdLine,
     int nShowCmd)
 {
+    UNREFERENCED_PARAMETER(lpCmdLine);
+    UNREFERENCED_PARAMETER(hPrevInstance);
+
     int argc = 0;
     LPWSTR * argv = NULL;
 

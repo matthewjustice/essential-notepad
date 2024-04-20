@@ -71,6 +71,7 @@ void UpdateTitleDirtyIndicator(void);
 
 // Function prototypes - file.c
 void SetEditTextFromFile(LPWSTR filePath);
+BOOL ConvertBytesToString(BYTE * data, size_t dataSize, WCHAR * wideText, size_t wideTextSize);
 void MainWndOnFileOpen(void);
 void MainWndOnFileSaveAs(void);
 void MainWndOnFileSave(void);

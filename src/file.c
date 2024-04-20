@@ -150,7 +150,7 @@ BOOL ConvertBytesToString(BYTE * data, size_t dataSize, WCHAR * wideText, size_t
         }
 
         // MultiByteToWideChar handles UTF-8 and ANSI
-        if(MultiByteToWideChar(CP_UTF8, MB_PRECOMPOSED, data, -1, wideText, wideTextSize / sizeof(WCHAR)) != 0)
+        if(MultiByteToWideChar(CP_UTF8, MB_PRECOMPOSED, (LPCCH)data, -1, wideText, (int)(wideTextSize / sizeof(WCHAR))) != 0)
         {
             success = TRUE;
         }
@@ -363,7 +363,7 @@ BYTE * ConvertWideTextToUTF8(LPWSTR wideText, int extraBytes, size_t * writeByte
     if(fileBytes)
     {
         // Convert the string.
-        if(WideCharToMultiByte(CP_UTF8, 0, wideText, -1, fileBytes+extraBytes, fileBytesSize-extraBytes, NULL, NULL) != 0)
+        if(WideCharToMultiByte(CP_UTF8, 0, wideText, -1, (LPSTR)(fileBytes+extraBytes), (int)(fileBytesSize-extraBytes), NULL, NULL) != 0)
         {
             // Tell the caller to write 1 byte less to file since we don't need the null terminator.
             *writeBytesCount = fileBytesSize - 1;
@@ -400,7 +400,7 @@ void SaveEditTextToActiveFile()
     wideText = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, wideTextSize);
     if(wideText)
     {
-        if(GetWindowText(g_hwndEdit, wideText, wideTextSize / sizeof(WCHAR)) != 0)
+        if(GetWindowText(g_hwndEdit, wideText, (int)(wideTextSize / sizeof(WCHAR))) != 0)
         {
             // We have our wide character text. Now encode it.
             switch (g_fileEncoding)
@@ -429,7 +429,7 @@ void SaveEditTextToActiveFile()
             if(writeBytesPtr && writeBytesCount > 0)
             {
                 // TODO: Handle failure
-                if(WriteBytesToActiveFile(writeBytesPtr, writeBytesCount))
+                if(WriteBytesToActiveFile(writeBytesPtr, (DWORD)writeBytesCount))
                 {
                     // When the edit text is initially written to file, it is clean.
                     g_dirtyText = FALSE;
