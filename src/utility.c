@@ -34,5 +34,8 @@ void DebugLog(const WCHAR * format, ...)
 //
 // Do not log in release builds
 //
-void DebugLog(const WCHAR * format, ...) {}
+void DebugLog(const WCHAR * format, ...)
+{
+    UNREFERENCED_PARAMETER(format);
+}
 #endif /* DEBUG */
