@@ -116,9 +116,19 @@ BOOL InitApp()
 //
 BOOL InitWindow(int nCmdShow)
 {
+    // Get the width and height of the primary monitor
+    int screenWidth = GetSystemMetrics(SM_CXSCREEN);
+    int screenHeight = GetSystemMetrics(SM_CYSCREEN);
+
+    // Calculate the initial window size and position
+    int windowHeight = screenHeight * 2 / 3;
+    int windowWidth = windowHeight; // square window
+    int windowX = (screenWidth - windowWidth) / 2;
+    int windowY = (screenHeight - windowHeight) / 2;
+
     // create the main window
     g_hwndMain = CreateWindowEx(0, g_nameMainClass, APP_TITLE_W,
-        WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 500, 400,
+        WS_OVERLAPPEDWINDOW, windowX, windowY, windowWidth, windowHeight,
         NULL, NULL, g_hinst, 0);
 
     if (!g_hwndMain)
