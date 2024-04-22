@@ -508,11 +508,15 @@ LRESULT CALLBACK MainWndProc(
 int MsgLoop(void)
 {
     MSG msg;
+    HACCEL hAccelTable = LoadAccelerators(g_hinst, MAKEINTRESOURCE(IDR_ACCELMAIN));
 
     while (GetMessage(&msg, NULL, 0, 0))
     {
-        TranslateMessage(&msg); // translate WM_KEYDOWN to WM_CHAR
-        DispatchMessage(&msg);
+        if(!TranslateAccelerator(g_hwndMain, hAccelTable, &msg))
+        {
+            TranslateMessage(&msg); // translate WM_KEYDOWN to WM_CHAR
+            DispatchMessage(&msg);
+        }
     }
 
     return (int) msg.wParam;

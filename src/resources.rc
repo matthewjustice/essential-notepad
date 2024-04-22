@@ -18,7 +18,7 @@ BEGIN
         MENUITEM "&New\tCtrl+N",                IDM_FILE_NEW
         MENUITEM "&Open...\tCtrl+O",            IDM_FILE_OPEN
         MENUITEM "&Save\tCtrl+S",               IDM_FILE_SAVE
-        MENUITEM "&Save As...",                 IDM_FILE_SAVE_AS
+        MENUITEM "Save &As...\tCtrl+Shift+S",   IDM_FILE_SAVE_AS
         MENUITEM SEPARATOR
         MENUITEM "E&xit",                       IDM_FILE_EXIT
     END
@@ -34,6 +34,7 @@ BEGIN
     "N",            IDM_FILE_NEW,           VIRTKEY, CONTROL, NOINVERT
     "O",            IDM_FILE_OPEN,          VIRTKEY, CONTROL, NOINVERT
     "S",            IDM_FILE_SAVE,          VIRTKEY, CONTROL, NOINVERT
+    "S",            IDM_FILE_SAVE_AS,       VIRTKEY, CONTROL, SHIFT, NOINVERT
 END
 
 VS_VERSION_INFO VERSIONINFO
