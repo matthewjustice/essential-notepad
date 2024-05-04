@@ -21,15 +21,21 @@ by: Matthew Justice
 #define APP_TITLE_W        L"Essential Notepad"
 
 // Resource constants
-#define IDR_MENUMAIN       200
-#define IDR_ACCELMAIN      201
-#define IDM_FILE_NEW       300
-#define IDM_FILE_OPEN      301
-#define IDM_FILE_SAVE      302
-#define IDM_FILE_SAVE_AS   303
-#define IDM_FILE_EXIT      304
-#define IDM_VIEW_WORDWRAP  305
-#define IDM_VIEW_DARKMODE  306
+#define IDR_MENUMAIN          200
+#define IDR_ACCELMAIN         201
+#define IDM_FILE_NEW          300
+#define IDM_FILE_OPEN         301
+#define IDM_FILE_SAVE         302
+#define IDM_FILE_SAVE_AS      303
+#define IDM_FILE_EXIT         304
+#define IDM_VIEW_WORDWRAP     305
+#define IDM_VIEW_DARKMODE     306
+#define IDM_EDIT_UNDO         307
+#define IDM_EDIT_CUT          308
+#define IDM_EDIT_COPY         309
+#define IDM_EDIT_PASTE        310
+#define IDM_EDIT_DELETE       311
+#define IDM_EDIT_SELECT_ALL   312
 
 // File related constants
 #define ENCODING_UNSPECIFIED -1
