@@ -451,6 +451,24 @@ LRESULT MainWndOnCommand(HWND hwnd, int id, int code)
     case IDM_VIEW_DARKMODE:
         MainWndOnViewDarkMode();
         break;
+    case IDM_EDIT_UNDO:
+        SendMessage(g_hwndEdit, EM_UNDO, 0, 0);
+        break;
+    case IDM_EDIT_CUT:
+        SendMessage(g_hwndEdit, WM_CUT, 0, 0);
+        break;
+    case IDM_EDIT_COPY:
+        SendMessage(g_hwndEdit, WM_COPY, 0, 0);
+        break;
+    case IDM_EDIT_PASTE:
+        SendMessage(g_hwndEdit, WM_PASTE, 0, 0);
+        break;
+    case IDM_EDIT_DELETE:
+        SendMessage(g_hwndEdit, WM_CLEAR, 0, 0);
+        break;
+    case IDM_EDIT_SELECT_ALL:
+        SendMessage(g_hwndEdit, EM_SETSEL, 0, -1);
+        break;
     case IDC_EDIT:
         EditControlOnCommand(code);
         break;
