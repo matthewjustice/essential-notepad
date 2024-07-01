@@ -65,6 +65,12 @@ BOOL CreateEditControl(HWND hwndParent, BOOL wordWrap)
     g_hwndEdit = CreateWindowEx(0, L"Edit", textBuffer,
         style, 0, 0, editWidth, editHeight, hwndParent, (HMENU)IDC_EDIT, g_hinst, NULL);
 
+    if(g_hwndEdit)
+    {
+        // Set the focus to the edit control
+        SetFocus(g_hwndEdit);
+    }
+
     // If we allocated a text buffer, free it now
     if(textBuffer)
     {
