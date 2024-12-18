@@ -146,11 +146,23 @@ BOOL InitWindow(int nCmdShow)
 }
 
 //
+// CreateScaledFont
+// Helper function to create scaled font based on DPI
+//
+HFONT CreateScaledFont(UINT dpi)
+{
+    int scaledHeight = MulDiv(18, dpi, 96); // Base font size of 18
+    return CreateFont(scaledHeight, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
+                     DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+                     DEFAULT_QUALITY, DEFAULT_PITCH|FF_DONTCARE, NULL);
+}
+
+//
 // MainWndOnCreate
 // Handles WM_CREATE for the main window
 //
-LRESULT MainWndOnCreate(HWND hwnd) {
-
+LRESULT MainWndOnCreate(HWND hwnd)
+{
     // Create the edit control window
     if(!CreateEditControl(hwnd, TRUE))
     {
@@ -168,6 +180,11 @@ LRESULT MainWndOnCreate(HWND hwnd) {
         // -1 indicates WM_CREATE failure
         return -1;
     }
+
+    // Handle font scaling based on initial DPI
+    UINT dpi = GetDpiForWindow(hwnd);
+    HFONT hFont = CreateScaledFont(dpi);
+    SendMessage(g_hwndEdit, WM_SETFONT, (WPARAM)hFont, TRUE);
 
     if(g_cmdLineFile)
     {
@@ -417,6 +434,18 @@ void MainWndOnViewDarkMode(void)
 }
 
 //
+// MainWndOnDpiChanged
+// Handles WM_DPICHANGED for the main window
+//
+LRESULT MainWndOnDpiChanged(int dpiY)
+{
+    HFONT hFont = CreateScaledFont(dpiY);
+    SendMessage(g_hwndEdit, WM_SETFONT, (WPARAM)hFont, TRUE);
+
+    return 0;
+}
+
+//
 // MainWndOnCommand
 // Handles WM_COMMAND for the main window
 //
@@ -502,6 +531,9 @@ LRESULT CALLBACK MainWndProc(
         break;
     case WM_CTLCOLOREDIT:
         result = MainWndOnControlColorEdit((HDC)wparam);
+        break;
+    case WM_DPICHANGED:
+        result = MainWndOnDpiChanged(HIWORD(wparam));
         break;
     case WM_CLOSE:
         if(ConfirmSaveChanges())
