@@ -437,10 +437,16 @@ void MainWndOnViewDarkMode(void)
 // MainWndOnDpiChanged
 // Handles WM_DPICHANGED for the main window
 //
-LRESULT MainWndOnDpiChanged(int dpiY)
+LRESULT MainWndOnDpiChanged(int dpiY, RECT * pWindowRect)
 {
+    // Set the edit control font based on the new DPI
     HFONT hFont = CreateScaledFont(dpiY);
     SendMessage(g_hwndEdit, WM_SETFONT, (WPARAM)hFont, TRUE);
+
+    // Resize the window to match the new DPI
+    SetWindowPos(g_hwndMain, NULL, pWindowRect->left, pWindowRect->top,
+        pWindowRect->right - pWindowRect->left, pWindowRect->bottom - pWindowRect->top,
+        SWP_NOZORDER|SWP_NOACTIVATE);
 
     return 0;
 }
@@ -533,7 +539,7 @@ LRESULT CALLBACK MainWndProc(
         result = MainWndOnControlColorEdit((HDC)wparam);
         break;
     case WM_DPICHANGED:
-        result = MainWndOnDpiChanged(HIWORD(wparam));
+        result = MainWndOnDpiChanged(HIWORD(wparam), (RECT *)lparam);
         break;
     case WM_CLOSE:
         if(ConfirmSaveChanges())
