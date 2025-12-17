@@ -98,6 +98,9 @@ BOOL CreateEditControl(HWND hwndParent, BOOL wordWrap);
 BOOL SetEditText(BYTE * data, size_t dataSize);
 LRESULT MainWndOnControlColorEdit(HDC hdc);
 
+// Function prototypes - find.c
+void MainWndOnEditFind(void);
+
 // Function prototypes - utility.c
 void DebugLog(const WCHAR * format, ...);
 
