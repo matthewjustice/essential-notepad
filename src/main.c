@@ -20,6 +20,7 @@ HINSTANCE g_hinst;  // main instance handle
 HWND g_hwndMain;    // handle to main window
 HWND g_hwndEdit = NULL;    // handle to edit control
 HWND g_hwndStatus = NULL;  // handle to status control
+HWND g_hwndFind = NULL;    // handle to find dialog
 WCHAR g_nameMainClass[] = L"MainWinClass"; // name of the main window class
 LPWSTR g_cmdLineFile = NULL;
 BOOL g_dirtyText = FALSE;   // "dirty" means text changes haven't been saved
@@ -507,6 +508,9 @@ LRESULT MainWndOnCommand(HWND hwnd, int id, int code)
     case IDC_EDIT:
         EditControlOnCommand(code);
         break;
+    case IDM_EDIT_FIND:
+        MainWndOnEditFind();
+        break;
     }
 
     return 0;
@@ -568,6 +572,12 @@ int MsgLoop(void)
 
     while (GetMessage(&msg, NULL, 0, 0))
     {
+        // Check if message is for the modeless Find dialog
+        if(g_hwndFind && IsDialogMessage(g_hwndFind, &msg))
+        {
+            continue;
+        }
+
         if(!TranslateAccelerator(g_hwndMain, hAccelTable, &msg))
         {
             TranslateMessage(&msg); // translate WM_KEYDOWN to WM_CHAR

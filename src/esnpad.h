@@ -16,6 +16,7 @@ by: Matthew Justice
 #define IDC_EDIT           100
 #define IDC_STATUS         101
 #define CB_BUFFER          512
+#define CCH_FIND_TEXT      256
 
 #define APP_TITLE_A        "Essential Notepad"
 #define APP_TITLE_W        L"Essential Notepad"
@@ -36,6 +37,16 @@ by: Matthew Justice
 #define IDM_EDIT_PASTE        310
 #define IDM_EDIT_DELETE       311
 #define IDM_EDIT_SELECT_ALL   312
+#define IDM_EDIT_FIND         313
+
+// Dialog constants
+#define IDC_STATIC            -1
+#define IDD_FIND              400
+#define IDC_FIND_TEXT         401
+#define IDC_FIND_NEXT         402
+#define IDC_MATCH_CASE        403
+#define IDC_DIRECTION_UP      404
+#define IDC_DIRECTION_DOWN    405
 
 // File related constants
 #define ENCODING_UNSPECIFIED -1
@@ -86,6 +97,9 @@ void MainWndOnFileSave(void);
 BOOL CreateEditControl(HWND hwndParent, BOOL wordWrap);
 BOOL SetEditText(BYTE * data, size_t dataSize);
 LRESULT MainWndOnControlColorEdit(HDC hdc);
+
+// Function prototypes - find.c
+void MainWndOnEditFind(void);
 
 // Function prototypes - utility.c
 void DebugLog(const WCHAR * format, ...);
