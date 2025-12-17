@@ -16,6 +16,7 @@ by: Matthew Justice
 #define IDC_EDIT           100
 #define IDC_STATUS         101
 #define CB_BUFFER          512
+#define CCH_FIND_TEXT      256
 
 #define APP_TITLE_A        "Essential Notepad"
 #define APP_TITLE_W        L"Essential Notepad"

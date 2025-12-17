@@ -55,7 +55,7 @@ BOOL CreateEditControl(HWND hwndParent, BOOL wordWrap)
     }
 
     // Set the style of the edit control based on the word wrap setting
-    DWORD style = WS_VISIBLE|WS_CHILD|WS_BORDER|WS_VSCROLL|ES_MULTILINE|ES_AUTOHSCROLL|ES_AUTOVSCROLL;
+    DWORD style = WS_VISIBLE|WS_CHILD|WS_BORDER|WS_VSCROLL|ES_MULTILINE|ES_AUTOHSCROLL|ES_AUTOVSCROLL|ES_NOHIDESEL;
     if(wordWrap)
     {
         style &= ~ES_AUTOHSCROLL;
