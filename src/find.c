@@ -82,6 +82,7 @@ void FindTextInEditControl(LPWSTR searchText, BOOL matchCase, BOOL searchDown)
         }
     }
 
+    // If found, select the text in the edit control
     if (foundPos != (DWORD)-1)
     {
         DebugLog(L"Text found at position: %d\n", foundPos);
@@ -93,7 +94,7 @@ void FindTextInEditControl(LPWSTR searchText, BOOL matchCase, BOOL searchDown)
     else
     {
         DebugLog(L"Text not found.\n");
-        MessageBox(g_hwndMain, L"The specified text was not found.", APP_TITLE_W, MB_OK | MB_ICONINFORMATION);
+        MessageBox(g_hwndMain, L"The text was not found.", APP_TITLE_W, MB_OK | MB_ICONINFORMATION);
     }
 
     // Free the text buffer
