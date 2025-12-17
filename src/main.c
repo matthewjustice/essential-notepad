@@ -452,6 +452,34 @@ LRESULT MainWndOnDpiChanged(int dpiY, RECT * pWindowRect)
 }
 
 //
+// FindDlgProc
+// Dialog procedure for the Find dialog
+//
+INT_PTR CALLBACK FindDlgProc(HWND hdlg, UINT msg, WPARAM wparam, LPARAM lparam)
+{
+    UNREFERENCED_PARAMETER(lparam);
+
+    switch(msg)
+    {
+    case WM_INITDIALOG:
+        CheckRadioButton(hdlg, IDC_DIRECTION_UP, IDC_DIRECTION_DOWN, IDC_DIRECTION_DOWN);
+        return TRUE;
+    case WM_COMMAND:
+        switch(LOWORD(wparam))
+        {
+        case IDC_FIND_NEXT:
+            return TRUE;
+        case IDCANCEL:
+            EndDialog(hdlg, LOWORD(wparam));
+            return TRUE;
+        }
+        break;
+    }
+
+    return FALSE;
+}
+
+//
 // MainWndOnCommand
 // Handles WM_COMMAND for the main window
 //
@@ -506,6 +534,9 @@ LRESULT MainWndOnCommand(HWND hwnd, int id, int code)
         break;
     case IDC_EDIT:
         EditControlOnCommand(code);
+        break;
+    case IDM_EDIT_FIND:
+        DialogBox(g_hinst, MAKEINTRESOURCE(IDD_FIND), g_hwndMain, FindDlgProc);
         break;
     }
 
