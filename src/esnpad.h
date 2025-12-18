@@ -22,6 +22,7 @@ by: Matthew Justice
 #define APP_TITLE_W        L"Essential Notepad"
 
 // Resource constants
+#define IDI_APPICON           100
 #define IDR_MENUMAIN          200
 #define IDR_ACCELMAIN         201
 #define IDM_FILE_NEW          300

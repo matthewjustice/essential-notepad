@@ -9,7 +9,7 @@ by: Matthew Justice
 ---------------------------------------------------------------*/
 #include "esnpad.h"
 
-100            ICON                    "esnpad.ico"
+IDI_APPICON            ICON                    "esnpad.ico"
 
 IDR_MENUMAIN MENU DISCARDABLE 
 BEGIN

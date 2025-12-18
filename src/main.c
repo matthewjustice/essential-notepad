@@ -106,7 +106,8 @@ BOOL InitApp()
     // additional parameters
     wc.hbrBackground = (HBRUSH) GetStockObject(WHITE_BRUSH);
     wc.hCursor = LoadCursor(NULL, IDC_ARROW);
-    wc.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+    wc.hIcon = LoadIcon(g_hinst, MAKEINTRESOURCE(IDI_APPICON));
+    wc.hIconSm = LoadIcon(g_hinst, MAKEINTRESOURCE(IDI_APPICON));
     wc.lpszMenuName = MAKEINTRESOURCE(IDR_MENUMAIN);
 
     // register the class so it can be used to create windows
