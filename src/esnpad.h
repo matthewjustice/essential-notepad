@@ -85,6 +85,7 @@ BOOL InitApp();
 BOOL InitWindow(int);
 int MsgLoop(void);
 void UpdateTitleDirtyIndicator(void);
+HFONT CreateScaledFont(UINT dpi);
 
 // Function prototypes - file.c
 void SetEditTextFromFile(LPWSTR filePath);

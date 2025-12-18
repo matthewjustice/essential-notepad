@@ -69,6 +69,11 @@ BOOL CreateEditControl(HWND hwndParent, BOOL wordWrap)
     {
         // Set the focus to the edit control
         SetFocus(g_hwndEdit);
+
+        // Set the font for the edit control based on the current DPI
+        UINT dpi = GetDpiForWindow(hwndParent);
+        HFONT hFont = CreateScaledFont(dpi);
+        SendMessage(g_hwndEdit, WM_SETFONT, (WPARAM)hFont, TRUE);
     }
 
     // If we allocated a text buffer, free it now

@@ -182,11 +182,6 @@ LRESULT MainWndOnCreate(HWND hwnd)
         return -1;
     }
 
-    // Handle font scaling based on initial DPI
-    UINT dpi = GetDpiForWindow(hwnd);
-    HFONT hFont = CreateScaledFont(dpi);
-    SendMessage(g_hwndEdit, WM_SETFONT, (WPARAM)hFont, TRUE);
-
     if(g_cmdLineFile)
     {
         SetEditTextFromFile(g_cmdLineFile);
